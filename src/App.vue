@@ -1,0 +1,122 @@
+<template>
+  <v-app>
+    <v-navigation-drawer v-if="!isPublicPage" v-model="drawer" app :width="260">
+      <div class="d-flex align-center px-4 py-3">
+        <v-avatar size="32" class="mr-3">
+          <v-img src="/m.png" alt="Vue Material" />
+        </v-avatar>
+        <span class="text-subtitle-1 font-weight-medium">Vue Material</span>
+      </div>
+      <v-divider />
+      <v-list density="compact" nav>
+        <template v-for="(item, idx) in menu" :key="idx">
+          <v-subheader v-if="item.header">{{ item.header }}</v-subheader>
+          <v-divider v-else-if="item.divider" />
+          <v-list-group
+            v-else-if="item.children"
+            :prepend-icon="item.icon"
+          >
+            <template v-slot:activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                :title="item.title"
+                density="comfortable"
+              />
+            </template>
+            <v-list-item
+              v-for="child in item.children"
+              :key="child.to"
+              :to="child.to"
+              :title="child.title"
+              color="primary"
+              density="comfortable"
+            />
+          </v-list-group>
+          <v-list-item
+            v-else
+            :to="item.to"
+            :prepend-icon="item.icon"
+            :title="item.title"
+            color="primary"
+            density="comfortable"
+          />
+        </template>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar v-if="!isPublicPage" app flat color="primary" density="comfortable" dark>
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
+      <v-toolbar-title>Vue Material</v-toolbar-title>
+      <v-spacer />
+      <v-btn size="small" color="grey-lighten-4" class="mr-2" variant="flat">HIRE ME</v-btn>
+      <v-btn :icon="theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'" variant="text" @click="toggleTheme" class="mr-1" />
+      <v-btn icon="mdi-bell-outline" variant="text" class="mr-1" />
+      <v-menu transition="fade-transition" offset="8">
+        <template #activator="{ props }">
+          <v-btn icon variant="text" v-bind="props">
+            <v-avatar size="28">
+              <v-img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="User" />
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-list density="compact">
+          <v-list-item to="/profile" title="Profile" prepend-icon="mdi-account-circle" />
+          <v-list-item title="Settings" prepend-icon="mdi-cog-outline" />
+          <v-divider />
+          <v-list-item title="Logout" prepend-icon="mdi-logout" @click="handleLogout" />
+        </v-list>
+      </v-menu>
+    </v-app-bar>
+
+    <v-main>
+      <v-container v-if="!isPublicPage" fluid class="py-6">
+        <router-view />
+      </v-container>
+      <router-view v-else />
+    </v-main>
+  </v-app>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useTheme } from 'vuetify'
+import { menu } from './data/menu'
+
+const drawer = ref(true)
+const theme = useTheme()
+const route = useRoute()
+const router = useRouter()
+
+const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500']
+const isPublicPage = computed(() => publicRoutes.includes(route.path))
+
+const toggleTheme = () => {
+  const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
+  theme.global.name.value = newTheme
+  localStorage.setItem('theme', newTheme)
+}
+
+const handleLogout = () => {
+  // Navigate to login page on logout
+  router.push('/login')
+}
+</script>
+
+<style scoped>
+.v-navigation-drawer .v-list-item {
+  min-height: 38px;
+}
+
+.v-navigation-drawer .v-list-subheader {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-top: 16px;
+  padding-bottom: 8px;
+}
+
+.v-navigation-drawer .v-list-group {
+  --prepend-width: 40px;
+}
+</style>

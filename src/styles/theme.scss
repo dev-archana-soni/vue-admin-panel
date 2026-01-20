@@ -1,0 +1,245 @@
+// Global overrides to mirror the old Stylus theme
+
+body {
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  background: #f5f5f5;
+}
+
+body.v-theme--dark {
+  background: #1a1a1a;
+}
+
+h1 { font-size: 48px; font-weight: 200; letter-spacing: -1.5px; }
+h2 { font-size: 36px; font-weight: 300; letter-spacing: -0.5px; }
+h3 { font-size: 24px; font-weight: 300; }
+h4 { font-size: 20px; font-weight: 300; }
+h5 { font-size: 16px; font-weight: 400; }
+
+.v-card {
+  box-shadow: 0 1px 1px 0 rgba(60, 64, 67, 0.08), 0 1px 3px 1px rgba(60, 64, 67, 0.16);
+}
+
+.v-theme--dark .v-card {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.25);
+  background: #2c2c2c;
+}
+
+// List hover styling
+.v-list .v-list-item:hover,
+.v-list .v-list-item--active {
+  background: #f5f5f5 !important;
+}
+
+.v-theme--dark .v-list .v-list-item:hover,
+.v-theme--dark .v-list .v-list-item--active {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.v-navigation-drawer {
+  background: #fafafa;
+}
+
+.v-theme--dark .v-navigation-drawer {
+  background: #252525;
+}
+
+.v-app-bar {
+  background: #3f51b5 !important;
+}
+
+// List hover styling
+.v-list .v-list-item:hover,
+.v-list .v-list-item--active {
+  background: #f5f5f5 !important;
+}
+
+// Timeline styles (translated from Stylus)
+.timeline {
+  position: relative;
+  list-style: none;
+  padding-left: 0;
+  z-index: 1;
+}
+
+.timeline-block {
+  display: flex;
+}
+
+.timeline-detail {
+  flex: 1 1 0%;
+  padding-bottom: 30px;
+}
+
+.timeline-point {
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  order: 2;
+  width: 96px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+.timeline-point::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  bottom: -9px;
+  width: 1px;
+  margin-left: -1px;
+  z-index: -1;
+  background-color: #ebebeb;
+}
+
+.timeline-block:last-child .timeline-point::before {
+  bottom: 0 !important;
+}
+
+.timeline-block:first-child .timeline-point::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+}
+
+.timeline-block:last-child .timeline-point::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+}
+
+.timeline-content {
+  flex: 1 1 0%;
+  margin-bottom: 60px;
+}
+
+.timeline-period {
+  position: relative;
+  padding: 30px 0;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.timeline-period::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  background-color: #ebebeb;
+  border-radius: 50%;
+}
+
+.timeline-period:first-child::after {
+  display: none;
+}
+
+.timeline-point-xs .timeline-point { width: 32px; }
+.timeline-point-sm .timeline-point { width: 64px; }
+.timeline-point-lg .timeline-point { width: 128px; }
+.timeline-point-xl .timeline-point { width: 256px; }
+
+@media (max-width: 960px) {
+  .timeline-block .timeline-detail { order: 1; }
+  .timeline-block .timeline-content { order: 3; }
+}
+
+@media (min-width: 960px) {
+  .timeline-block:nth-child(even) .timeline-detail { order: 1; text-align: right; }
+  .timeline-block:nth-child(even) .timeline-content { order: 3; }
+  .timeline-block:nth-child(odd) .timeline-detail { order: 3; text-align: left; }
+  .timeline-block:nth-child(odd) .timeline-content { order: 1; }
+}
+
+// Chat list hover
+.chat-history--list .v-list-item.v-list-item--active,
+.chat-history--list .v-list-item:hover {
+  background: #eee;
+}
+
+// Chat room heights
+.chat-history--scrollbar {
+  height: calc(100vh - 48px);
+}
+
+@media (max-width: 600px) {
+  .chat-history--scrollbar {
+    height: calc(100vh - 48px - 56px);
+  }
+}
+
+.chat-room--scrollbar {
+  height: calc(100vh - 48px - 80px);
+}
+
+// Mail layout tweaks
+.mail-toolbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.mail-list--layout {
+  padding-top: 64px !important;
+}
+
+@media (max-width: 600px) {
+  .mail-list--layout {
+    padding-top: 56px !important;
+  }
+}
+
+.mail-list--toolbar {
+  margin-top: 64px !important;
+}
+
+@media (max-width: 600px) {
+  .mail-list--toolbar {
+    margin-top: 56px !important;
+  }
+}
+
+.mail-list--wrap {
+  height: calc(100vh - 64px - 64px);
+}
+
+.mail-reply--layout {
+  padding-top: 64px !important;
+}
+
+.mail-reply--toolbar {
+  margin-top: 64px !important;
+}
+
+.mail-reply--scrollbar {
+  height: calc(100vh - 64px - 64px);
+}
+
+@media (max-width: 600px) {
+  .mail-reply--layout {
+    padding-top: 56px !important;
+  }
+  .mail-reply--toolbar {
+    margin-top: 56px !important;
+  }
+  .mail-reply--scrollbar {
+    height: calc(100vh - 56px - 56px);
+  }
+}
