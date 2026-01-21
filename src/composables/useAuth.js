@@ -31,11 +31,20 @@ export function useAuth() {
     return result;
   };
 
-  const logout = () => {
-    token.value = null;
-    user.value = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      if (token.value) {
+        await authAPI.logout(token.value);
+      }
+    } catch (error) {
+      // Ignore logout errors and clear client state regardless.
+      console.error('Logout error:', error);
+    } finally {
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   };
 
   return {

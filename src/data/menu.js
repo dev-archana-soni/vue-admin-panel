@@ -1,6 +1,7 @@
 export const menu = [
   { header: 'Apps' },
   { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/dashboard' },
+  { title: 'Users', icon: 'mdi-account-multiple', to: '/users' },
   { title: 'Chat', icon: 'mdi-chat', to: '/chat' },
   { title: 'Inbox', icon: 'mdi-email', to: '/mail' },
   { title: 'Media', icon: 'mdi-filmstrip', to: '/media' },

@@ -1,268 +1,144 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12">
-        <div class="d-flex align-center mb-4">
-          <div>
-            <h1 class="text-h4">Roles Management</h1>
-            <p class="text-medium-emphasis">Manage user roles and their permissions</p>
-          </div>
-          <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreateDialog">
-            Create Role
+  <v-container class="py-6" fluid>
+    <!-- Loading State -->
+    <v-progress-linear v-if="loading" indeterminate color="primary"></v-progress-linear>
+
+    <!-- Success Message -->
+    <v-alert v-if="successMessage" type="success" closable class="mb-4" @click:close="successMessage = ''">
+      {{ successMessage }}
+    </v-alert>
+
+    <!-- Error Message -->
+    <v-alert v-if="errorMessage" type="error" closable class="mb-4" @click:close="errorMessage = ''">
+      {{ errorMessage }}
+    </v-alert>
+
+    <v-row class="mb-4">
+      <v-col cols="12" md="8">
+        <div class="text-h5">Roles Management</div>
+      </v-col>
+      <v-col cols="12" md="4" class="text-end">
+        <v-btn color="primary" variant="flat" @click="openCreateDialog">
+          <v-icon left>mdi-plus</v-icon>Add New Role
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <!-- Roles Table -->
+    <v-card class="pa-4">
+      <v-data-table
+        :headers="headers"
+        :items="roles"
+        :loading="loading"
+        class="elevation-0"
+      >
+        <template #item.isActive="{ item }">
+          <v-chip :color="item.isActive ? 'success' : 'grey'" text-color="white" size="small">
+            {{ item.isActive ? 'Active' : 'Inactive' }}
+          </v-chip>
+        </template>
+        <template #item.actions="{ item }">
+          <v-btn icon size="small" color="primary" @click.stop="editRole(item)">
+            <v-icon>mdi-pencil</v-icon>
           </v-btn>
-        </div>
-      </v-col>
-    </v-row>
-
-    <!-- Search and Filters -->
-    <v-row>
-      <v-col cols="12">
-        <v-card elevation="2">
-          <v-card-text class="pa-4">
-            <v-row align="center">
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="searchQuery"
-                  placeholder="Search roles..."
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                  clearable
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <v-select
-                  v-model="statusFilter"
-                  :items="statusOptions"
-                  label="Status"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <div class="text-body-2">
-                  Total Roles: <strong>{{ filteredRoles.length }}</strong>
-                </div>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Roles Cards -->
-    <v-row>
-      <v-col v-for="role in filteredRoles" :key="role.id" cols="12" md="6" lg="4">
-        <v-card elevation="2" :class="{ 'role-card-disabled': !role.active }">
-          <v-card-title class="d-flex align-center pa-4">
-            <v-icon :color="role.color" class="mr-3" size="large">{{ role.icon }}</v-icon>
-            <div class="flex-grow-1">
-              <div class="text-h6">{{ role.name }}</div>
-              <v-chip size="x-small" :color="role.active ? 'success' : 'error'" class="mt-1">
-                {{ role.active ? 'Active' : 'Inactive' }}
-              </v-chip>
-            </div>
-            <v-menu>
-              <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" size="small" />
-              </template>
-              <v-list density="compact">
-                <v-list-item @click="editRole(role)">
-                  <template v-slot:prepend>
-                    <v-icon size="small">mdi-pencil</v-icon>
-                  </template>
-                  <v-list-item-title>Edit</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="viewPermissions(role)">
-                  <template v-slot:prepend>
-                    <v-icon size="small">mdi-shield-key</v-icon>
-                  </template>
-                  <v-list-item-title>Permissions</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="duplicateRole(role)">
-                  <template v-slot:prepend>
-                    <v-icon size="small">mdi-content-copy</v-icon>
-                  </template>
-                  <v-list-item-title>Duplicate</v-list-item-title>
-                </v-list-item>
-                <v-divider />
-                <v-list-item @click="toggleStatus(role)">
-                  <template v-slot:prepend>
-                    <v-icon size="small">{{ role.active ? 'mdi-cancel' : 'mdi-check-circle' }}</v-icon>
-                  </template>
-                  <v-list-item-title>{{ role.active ? 'Deactivate' : 'Activate' }}</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="confirmDelete(role)" :disabled="role.default">
-                  <template v-slot:prepend>
-                    <v-icon size="small" color="error">mdi-delete</v-icon>
-                  </template>
-                  <v-list-item-title class="text-error">Delete</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-card-title>
-
-          <v-divider />
-
-          <v-card-text class="pa-4">
-            <div class="text-body-2 mb-3">{{ role.description }}</div>
-
-            <div class="d-flex align-center mb-2">
-              <v-icon size="small" class="mr-2">mdi-account-group</v-icon>
-              <span class="text-body-2">
-                <strong>{{ role.usersCount }}</strong> users assigned
-              </span>
-            </div>
-
-            <div class="d-flex align-center mb-3">
-              <v-icon size="small" class="mr-2">mdi-shield-check</v-icon>
-              <span class="text-body-2">
-                <strong>{{ role.permissionsCount }}</strong> permissions
-              </span>
-            </div>
-
-            <v-divider class="my-3" />
-
-            <div class="text-caption text-medium-emphasis mb-2">Key Permissions:</div>
-            <div class="d-flex flex-wrap gap-1">
-              <v-chip
-                v-for="perm in role.keyPermissions"
-                :key="perm"
-                size="x-small"
-                variant="outlined"
-              >
-                {{ perm }}
-              </v-chip>
-            </div>
-
-            <div v-if="role.default" class="mt-3">
-              <v-alert type="info" density="compact" variant="tonal">
-                <span class="text-caption">Default role - Cannot be deleted</span>
-              </v-alert>
-            </div>
-          </v-card-text>
-
-          <v-divider />
-
-          <v-card-actions class="pa-3">
-            <v-btn variant="outlined" size="small" @click="viewPermissions(role)">
-              Manage Permissions
-            </v-btn>
-            <v-spacer />
-            <v-btn variant="text" size="small" @click="editRole(role)">
-              Edit
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+          <v-btn icon size="small" color="error" @click.stop="deleteRoleDialog(item)">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <!-- Create/Edit Role Dialog -->
-    <v-dialog v-model="roleDialog" max-width="600" persistent>
+    <v-dialog v-model="showDialog" max-width="500px">
       <v-card>
-        <v-card-title class="d-flex align-center pa-4">
-          <span class="text-h6">{{ editingRole ? 'Edit Role' : 'Create New Role' }}</span>
-          <v-spacer />
-          <v-btn icon="mdi-close" variant="text" size="small" @click="closeDialog" />
+        <v-card-title class="text-h6 bg-primary text-white">
+          {{ editingId ? 'Edit Role' : 'Add New Role' }}
         </v-card-title>
+        <v-card-text class="pt-6">
+          <!-- Dialog Error Messages -->
+          <v-alert v-if="dialogError" type="error" closable class="mb-4" @click:close="dialogError = ''">
+            {{ dialogError }}
+          </v-alert>
 
-        <v-divider />
-
-        <v-card-text class="pa-4">
-          <v-form ref="roleForm">
-            <v-text-field
-              v-model="roleData.name"
-              label="Role Name"
-              prepend-inner-icon="mdi-account-key"
-              variant="outlined"
-              density="comfortable"
-              :rules="[rules.required]"
-              class="mb-3"
-            />
-
-            <v-textarea
-              v-model="roleData.description"
-              label="Description"
-              prepend-inner-icon="mdi-text"
-              variant="outlined"
-              rows="3"
-              :rules="[rules.required]"
-              class="mb-3"
-            />
-
-            <v-select
-              v-model="roleData.icon"
-              :items="iconOptions"
-              label="Icon"
-              prepend-inner-icon="mdi-emoticon"
-              variant="outlined"
-              density="comfortable"
-              class="mb-3"
-            >
-              <template v-slot:item="{ props, item }">
-                <v-list-item v-bind="props">
-                  <template v-slot:prepend>
-                    <v-icon>{{ item.value }}</v-icon>
+          <v-row dense>
+            <v-col cols="12">
+              <v-text-field
+                v-model="form.name"
+                label="Role Name"
+                variant="outlined"
+                density="comfortable"
+                :error="!!formErrors.name"
+                :error-messages="formErrors.name"
+              />
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                v-model="form.description"
+                label="Description"
+                variant="outlined"
+                density="comfortable"
+                rows="3"
+              />
+            </v-col>
+            <v-col cols="12">
+              <v-switch
+                v-model="form.isActive"
+                label="Active"
+                color="primary"
+                hide-details
+              />
+            </v-col>
+            <v-col cols="12">
+              <div class="text-subtitle-2 mb-2">Permissions</div>
+              <v-expansion-panels>
+                <v-expansion-panel v-for="module in modulesWithPermissions" :key="module.id">
+                  <template #title>
+                    <v-icon size="small" class="mr-2">{{ module.icon || 'mdi-puzzle' }}</v-icon>
+                    <strong>{{ module.displayName }}</strong>
                   </template>
-                </v-list-item>
-              </template>
-            </v-select>
-
-            <v-select
-              v-model="roleData.color"
-              :items="colorOptions"
-              label="Color"
-              prepend-inner-icon="mdi-palette"
-              variant="outlined"
-              density="comfortable"
-              class="mb-3"
-            >
-              <template v-slot:item="{ props, item }">
-                <v-list-item v-bind="props">
-                  <template v-slot:prepend>
-                    <v-avatar :color="item.value" size="24" />
-                  </template>
-                </v-list-item>
-              </template>
-            </v-select>
-
-            <v-switch
-              v-model="roleData.active"
-              label="Active"
-              color="primary"
-              hide-details
-            />
-          </v-form>
+                  <v-expansion-panel-text>
+                    <v-row dense>
+                      <v-col v-for="perm in module.permissions" :key="perm.id" cols="12" sm="6">
+                        <v-checkbox
+                          :model-value="form.permissions.includes(perm.id)"
+                          :label="perm.name"
+                          :value="perm.id"
+                          @update:model-value="togglePermission(perm.id)"
+                          density="comfortable"
+                          hide-details
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-col>
+          </v-row>
         </v-card-text>
-
-        <v-divider />
-
         <v-card-actions class="pa-4">
-          <v-btn color="primary" @click="saveRole" :loading="saving">
-            {{ editingRole ? 'Update' : 'Create' }}
-          </v-btn>
-          <v-btn variant="text" @click="closeDialog">
-            Cancel
+          <v-spacer />
+          <v-btn variant="outlined" @click="closeDialog">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" @click="saveRole" :loading="savingRole">
+            {{ editingId ? 'Update' : 'Create' }}
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="400">
+    <v-dialog v-model="showDeleteDialog" max-width="400px">
       <v-card>
-        <v-card-title class="text-h6">Delete Role?</v-card-title>
-        <v-card-text>
-          Are you sure you want to delete the role "<strong>{{ roleToDelete?.name }}</strong>"?
-          This action cannot be undone. All users with this role will need to be reassigned.
+        <v-card-title class="text-h6 bg-error text-white">Confirm Delete</v-card-title>
+        <v-card-text class="pt-6">
+          <p>Are you sure you want to delete role <strong>{{ deleteRoleName }}</strong>?</p>
+          <p class="text-caption text-medium-emphasis">This action cannot be undone.</p>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer />
-          <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" @click="deleteRole">Delete</v-btn>
+          <v-btn variant="outlined" @click="showDeleteDialog = false">Cancel</v-btn>
+          <v-btn color="error" variant="flat" @click="confirmDelete" :loading="deletingRole">
+            Delete
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -270,252 +146,196 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+import { rolesAPI, modulesAPI, permissionsAPI } from '@/services/authService'
 
-const router = useRouter()
+const { token } = useAuth()
 
-const searchQuery = ref('')
-const statusFilter = ref('all')
-const roleDialog = ref(false)
-const deleteDialog = ref(false)
-const editingRole = ref(null)
-const roleToDelete = ref(null)
-const saving = ref(false)
-const roleForm = ref(null)
+const headers = [
+  { title: 'Role Name', key: 'name' },
+  { title: 'Description', key: 'description' },
+  { title: 'Status', key: 'isActive' },
+  { title: 'Actions', key: 'actions', sortable: false }
+]
 
-const roleData = ref({
+const roles = ref([])
+const modules = ref([])
+const modulesWithPermissions = ref([])
+const loading = ref(false)
+const savingRole = ref(false)
+const deletingRole = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+const showDialog = ref(false)
+const showDeleteDialog = ref(false)
+const editingId = ref(null)
+const deleteRoleName = ref('')
+const deleteRoleId = ref(null)
+const dialogError = ref('')
+
+const form = ref({
   name: '',
   description: '',
-  icon: 'mdi-account',
-  color: 'primary',
-  active: true
+  isActive: true,
+  permissions: []
 })
 
-const statusOptions = [
-  { title: 'All Status', value: 'all' },
-  { title: 'Active', value: 'active' },
-  { title: 'Inactive', value: 'inactive' }
-]
+const formErrors = ref({
+  name: ''
+})
 
-const iconOptions = [
-  { title: 'Account', value: 'mdi-account' },
-  { title: 'Shield', value: 'mdi-shield-account' },
-  { title: 'Crown', value: 'mdi-crown' },
-  { title: 'Star', value: 'mdi-star' },
-  { title: 'Key', value: 'mdi-key' },
-  { title: 'Badge', value: 'mdi-badge-account' }
-]
-
-const colorOptions = [
-  { title: 'Primary', value: 'primary' },
-  { title: 'Secondary', value: 'secondary' },
-  { title: 'Success', value: 'success' },
-  { title: 'Warning', value: 'warning' },
-  { title: 'Error', value: 'error' },
-  { title: 'Info', value: 'info' }
-]
-
-const rules = {
-  required: value => !!value || 'This field is required'
+const fetchRoles = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const response = await rolesAPI.getAllRoles(token.value)
+    roles.value = response.roles
+  } catch (error) {
+    errorMessage.value = error.message || 'Failed to load roles'
+    console.error('Fetch roles error:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
-const roles = ref([
-  {
-    id: 1,
-    name: 'Super Administrator',
-    description: 'Full system access with all permissions',
-    icon: 'mdi-crown',
-    color: 'error',
-    usersCount: 2,
-    permissionsCount: 48,
-    active: true,
-    default: true,
-    keyPermissions: ['All Access', 'System Config', 'User Management']
-  },
-  {
-    id: 2,
-    name: 'Administrator',
-    description: 'Administrative access to most system features',
-    icon: 'mdi-shield-account',
-    color: 'primary',
-    usersCount: 5,
-    permissionsCount: 35,
-    active: true,
-    default: true,
-    keyPermissions: ['User Management', 'Content Management', 'Reports']
-  },
-  {
-    id: 3,
-    name: 'Manager',
-    description: 'Can manage team members and view reports',
-    icon: 'mdi-account-tie',
-    color: 'info',
-    usersCount: 12,
-    permissionsCount: 22,
-    active: true,
-    default: false,
-    keyPermissions: ['Team Management', 'Reports', 'Analytics']
-  },
-  {
-    id: 4,
-    name: 'Editor',
-    description: 'Can create and edit content',
-    icon: 'mdi-pencil',
-    color: 'success',
-    usersCount: 28,
-    permissionsCount: 15,
-    active: true,
-    default: false,
-    keyPermissions: ['Create Content', 'Edit Content', 'Media Upload']
-  },
-  {
-    id: 5,
-    name: 'Viewer',
-    description: 'Read-only access to content',
-    icon: 'mdi-eye',
-    color: 'secondary',
-    usersCount: 45,
-    permissionsCount: 8,
-    active: true,
-    default: false,
-    keyPermissions: ['View Content', 'View Reports']
-  },
-  {
-    id: 6,
-    name: 'Guest',
-    description: 'Limited access for temporary users',
-    icon: 'mdi-account-question',
-    color: 'warning',
-    usersCount: 10,
-    permissionsCount: 5,
-    active: false,
-    default: false,
-    keyPermissions: ['Basic Access', 'View Public']
+const fetchModulesAndPermissions = async () => {
+  try {
+    const modulesResponse = await modulesAPI.getAllModules(token.value)
+    const permissionsResponse = await permissionsAPI.getAllPermissions(token.value)
+    
+    modules.value = modulesResponse.modules
+    const permissions = permissionsResponse.permissions
+    
+    // Group permissions by module
+    modulesWithPermissions.value = modules.value.map(module => ({
+      ...module,
+      permissions: permissions.filter(p => p.module?.id === module.id)
+    }))
+  } catch (error) {
+    console.error('Fetch modules/permissions error:', error)
   }
-])
+}
 
-const filteredRoles = computed(() => {
-  let filtered = [...roles.value]
+const validateForm = () => {
+  formErrors.value = { name: '' }
 
-  if (statusFilter.value === 'active') {
-    filtered = filtered.filter(r => r.active)
-  } else if (statusFilter.value === 'inactive') {
-    filtered = filtered.filter(r => !r.active)
+  if (!form.value.name) {
+    formErrors.value.name = 'Role name is required'
   }
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(r =>
-      r.name.toLowerCase().includes(query) ||
-      r.description.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
-})
+  return !Object.values(formErrors.value).some(error => error)
+}
 
 const openCreateDialog = () => {
-  editingRole.value = null
-  roleData.value = {
+  editingId.value = null
+  form.value = {
     name: '',
     description: '',
-    icon: 'mdi-account',
-    color: 'primary',
-    active: true
+    isActive: true,
+    permissions: []
   }
-  roleDialog.value = true
+  dialogError.value = ''
+  showDialog.value = true
 }
 
 const editRole = (role) => {
-  editingRole.value = role
-  roleData.value = {
+  editingId.value = role.id
+  form.value = {
     name: role.name,
-    description: role.description,
-    icon: role.icon,
-    color: role.color,
-    active: role.active
+    description: role.description || '',
+    isActive: role.isActive,
+    permissions: role.permissions || []
   }
-  roleDialog.value = true
-}
-
-const closeDialog = () => {
-  roleDialog.value = false
-  editingRole.value = null
-  roleData.value = {
-    name: '',
-    description: '',
-    icon: 'mdi-account',
-    color: 'primary',
-    active: true
-  }
+  dialogError.value = ''
+  showDialog.value = true
 }
 
 const saveRole = async () => {
-  const { valid } = await roleForm.value.validate()
-  if (!valid) return
+  if (!validateForm()) {
+    return
+  }
 
-  saving.value = true
+  savingRole.value = true
+  dialogError.value = ''
 
-  setTimeout(() => {
-    if (editingRole.value) {
-      Object.assign(editingRole.value, roleData.value)
+  try {
+    if (editingId.value) {
+      await rolesAPI.updateRole(token.value, editingId.value, form.value)
+      successMessage.value = 'Role updated successfully'
     } else {
-      roles.value.push({
-        id: roles.value.length + 1,
-        ...roleData.value,
-        usersCount: 0,
-        permissionsCount: 0,
-        default: false,
-        keyPermissions: []
-      })
+      await rolesAPI.createRole(token.value, form.value)
+      successMessage.value = 'Role created successfully'
     }
-    saving.value = false
+    await fetchRoles()
     closeDialog()
-  }, 500)
-}
-
-const viewPermissions = (role) => {
-  router.push({ name: 'permissions', query: { roleId: role.id } })
-}
-
-const duplicateRole = (role) => {
-  const newRole = {
-    ...role,
-    id: roles.value.length + 1,
-    name: `${role.name} (Copy)`,
-    usersCount: 0,
-    default: false
+  } catch (error) {
+    dialogError.value = error.message || 'Failed to save role'
+    console.error('Save role error:', error)
+  } finally {
+    savingRole.value = false
   }
-  roles.value.push(newRole)
 }
 
-const toggleStatus = (role) => {
-  role.active = !role.active
+const deleteRoleDialog = (role) => {
+  deleteRoleId.value = role.id
+  deleteRoleName.value = role.name
+  showDeleteDialog.value = true
 }
 
-const confirmDelete = (role) => {
-  if (role.default) return
-  roleToDelete.value = role
-  deleteDialog.value = true
-}
+const confirmDelete = async () => {
+  deletingRole.value = true
+  errorMessage.value = ''
 
-const deleteRole = () => {
-  const index = roles.value.findIndex(r => r.id === roleToDelete.value.id)
-  if (index !== -1) {
-    roles.value.splice(index, 1)
+  try {
+    await rolesAPI.deleteRole(token.value, deleteRoleId.value)
+    successMessage.value = 'Role deleted successfully'
+    await fetchRoles()
+    showDeleteDialog.value = false
+  } catch (error) {
+    errorMessage.value = error.message || 'Failed to delete role'
+    console.error('Delete role error:', error)
+  } finally {
+    deletingRole.value = false
   }
-  deleteDialog.value = false
-  roleToDelete.value = null
 }
+
+const closeDialog = () => {
+  showDialog.value = false
+  editingId.value = null
+  form.value = {
+    name: '',
+    description: '',
+    isActive: true,
+    permissions: []
+  }
+  dialogError.value = ''
+}
+
+const togglePermission = (permissionId) => {
+  const index = form.value.permissions.indexOf(permissionId)
+  if (index > -1) {
+    form.value.permissions.splice(index, 1)
+  } else {
+    form.value.permissions.push(permissionId)
+  }
+}
+
+onMounted(() => {
+  if (token.value) {
+    fetchRoles()
+    fetchModulesAndPermissions()
+  }
+})
 </script>
 
 <style scoped>
-.role-card-disabled {
-  opacity: 0.6;
+:deep(.v-data-table) {
+  cursor: pointer;
 }
 
-.gap-1 {
-  gap: 4px;
+:deep(.v-data-table tbody tr:hover) {
+  background-color: rgba(0, 0, 0, 0.02) !important;
 }
 </style>

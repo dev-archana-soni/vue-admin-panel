@@ -35,6 +35,22 @@ export const authAPI = {
     return await response.json();
   },
 
+  logout: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Logout failed');
+    }
+
+    return await response.json();
+  },
+
   getProfile: async (token) => {
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
       method: 'GET',
@@ -45,6 +61,465 @@ export const authAPI = {
 
     if (!response.ok) {
       throw new Error('Failed to fetch profile');
+    }
+
+    return await response.json();
+  },
+
+  fetchProfile: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch profile');
+    }
+
+    return await response.json();
+  },
+
+  updateProfile: async (token, profileData) => {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update profile');
+    }
+
+    return await response.json();
+  },
+
+  updatePassword: async (token, passwordData) => {
+    const response = await fetch(`${API_BASE_URL}/auth/update-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(passwordData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update password');
+    }
+
+    return await response.json();
+  },
+};
+
+export const usersAPI = {
+  getAvailableRoles: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/users/roles`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch roles');
+    }
+
+    return await response.json();
+  },
+
+  getAllUsers: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch users');
+    }
+
+    return await response.json();
+  },
+
+  getUserById: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch user');
+    }
+
+    return await response.json();
+  },
+
+  createUser: async (token, userData) => {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create user');
+    }
+
+    return await response.json();
+  },
+
+  updateUser: async (token, id, userData) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update user');
+    }
+
+    return await response.json();
+  },
+
+  deleteUser: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete user');
+    }
+
+    return await response.json();
+  },
+};
+
+export const rolesAPI = {
+  getAllRoles: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/roles`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch roles');
+    }
+
+    return await response.json();
+  },
+
+  getActiveRoles: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/roles/active`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch active roles');
+    }
+
+    return await response.json();
+  },
+
+  getRoleById: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/roles/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch role');
+    }
+
+    return await response.json();
+  },
+
+  createRole: async (token, roleData) => {
+    const response = await fetch(`${API_BASE_URL}/roles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(roleData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create role');
+    }
+
+    return await response.json();
+  },
+
+  updateRole: async (token, id, roleData) => {
+    const response = await fetch(`${API_BASE_URL}/roles/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(roleData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update role');
+    }
+
+    return await response.json();
+  },
+
+  deleteRole: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/roles/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete role');
+    }
+
+    return await response.json();
+  },
+};
+
+export const modulesAPI = {
+  getAllModules: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/modules`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch modules');
+    }
+
+    return await response.json();
+  },
+
+  getActiveModules: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/modules/active/list`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch active modules');
+    }
+
+    return await response.json();
+  },
+
+  getModuleById: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/modules/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch module');
+    }
+
+    return await response.json();
+  },
+
+  createModule: async (token, data) => {
+    const response = await fetch(`${API_BASE_URL}/modules`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create module');
+    }
+
+    return await response.json();
+  },
+
+  updateModule: async (token, id, data) => {
+    const response = await fetch(`${API_BASE_URL}/modules/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update module');
+    }
+
+    return await response.json();
+  },
+
+  deleteModule: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/modules/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete module');
+    }
+
+    return await response.json();
+  },
+};
+
+export const permissionsAPI = {
+  getAllPermissions: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/permissions`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch permissions');
+    }
+
+    return await response.json();
+  },
+
+  getPermissionsByModule: async (token, moduleId) => {
+    const response = await fetch(`${API_BASE_URL}/permissions/module/${moduleId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch permissions');
+    }
+
+    return await response.json();
+  },
+
+  getPermissionById: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/permissions/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch permission');
+    }
+
+    return await response.json();
+  },
+
+  createPermission: async (token, data) => {
+    const response = await fetch(`${API_BASE_URL}/permissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create permission');
+    }
+
+    return await response.json();
+  },
+
+  updatePermission: async (token, id, data) => {
+    const response = await fetch(`${API_BASE_URL}/permissions/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update permission');
+    }
+
+    return await response.json();
+  },
+
+  deletePermission: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/permissions/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete permission');
     }
 
     return await response.json();

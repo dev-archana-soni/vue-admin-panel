@@ -6,6 +6,7 @@ import Register from '@/pages/Register.vue'
 import NotFound from '@/pages/NotFound.vue'
 import ServerError from '@/pages/ServerError.vue'
 import Profile from '@/pages/Profile.vue'
+import Users from '@/pages/Users.vue'
 import Placeholder from '@/pages/Placeholder.vue'
 import Alerts from '../components/Alerts.vue'
 import ChatDemo from '@/pages/ChatDemo.vue'
@@ -22,6 +23,7 @@ const routes = [
   { path: '/login', name: 'login', component: Login, meta: { public: true } },
   { path: '/register', name: 'register', component: Register, meta: { public: true } },
   { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
+  { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true } },
   // Apps
   { path: '/chat', name: 'chat', component: ChatDemo, meta: { requiresAuth: true } },
   { path: '/mail', name: 'mail', component: Inbox, meta: { requiresAuth: true } },

@@ -48,7 +48,6 @@
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>Vue Material</v-toolbar-title>
       <v-spacer />
-      <v-btn size="small" color="grey-lighten-4" class="mr-2" variant="flat">HIRE ME</v-btn>
       <v-btn :icon="theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'" variant="text" @click="toggleTheme" class="mr-1" />
       <v-btn icon="mdi-bell-outline" variant="text" class="mr-1" />
       <v-menu transition="fade-transition" offset="8">
@@ -81,12 +80,14 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
+import { useAuth } from '@/composables/useAuth'
 import { menu } from './data/menu'
 
 const drawer = ref(true)
 const theme = useTheme()
 const route = useRoute()
 const router = useRouter()
+const { logout } = useAuth()
 
 const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500']
 const isPublicPage = computed(() => publicRoutes.includes(route.path))
@@ -97,8 +98,8 @@ const toggleTheme = () => {
   localStorage.setItem('theme', newTheme)
 }
 
-const handleLogout = () => {
-  // Navigate to login page on logout
+const handleLogout = async () => {
+  await logout()
   router.push('/login')
 }
 </script>
