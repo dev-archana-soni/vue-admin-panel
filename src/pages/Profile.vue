@@ -17,8 +17,21 @@
       <v-col cols="12" md="4">
         <v-card class="pa-6 d-flex flex-column align-center">
           <v-avatar size="96" class="mb-4">
-            <v-img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="Profile" />
+            <v-img :src="imagePreview || profile.image || 'https://cdn.vuetifyjs.com/images/john.jpg'" alt="Profile" />
           </v-avatar>
+          <div v-if="isEditing" class="mb-3">
+            <v-file-input
+              v-model="selectedImage"
+              label="Upload Avatar"
+              accept="image/*"
+              prepend-icon="mdi-camera"
+              @change="onImageSelected"
+              variant="outlined"
+              density="comfortable"
+              class="mt-2"
+              clearable
+            />
+          </div>
           <div class="text-h6">{{ profile.name }}</div>
           <div class="text-body-2 text-medium-emphasis mb-4">{{ profile.role }}</div>
           <v-btn 
@@ -176,7 +189,8 @@ const profile = ref({
   firstName: '',
   lastName: '',
   phone: '',
-  address: ''
+  address: '',
+  image: ''
 })
 
 const form = ref({
@@ -185,6 +199,9 @@ const form = ref({
   phone: '',
   address: ''
 })
+
+const selectedImage = ref(null)
+const imagePreview = ref(null)
 
 const isEditing = ref(false)
 const loading = ref(false)
@@ -234,8 +251,20 @@ const updateProfile = async () => {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const response = await authAPI.updateProfile(token.value, form.value)
+    const formData = new FormData()
+    formData.append('firstName', form.value.firstName)
+    formData.append('lastName', form.value.lastName)
+    formData.append('phone', form.value.phone)
+    formData.append('address', form.value.address)
+    
+    if (selectedImage.value && selectedImage.value[0]) {
+      formData.append('image', selectedImage.value[0])
+    }
+
+    const response = await authAPI.updateProfile(token.value, formData)
     profile.value = response.user
+    imagePreview.value = null
+    selectedImage.value = null
     isEditing.value = false
     successMessage.value = response.message || 'Profile updated successfully'
   } catch (error) {
@@ -253,6 +282,8 @@ const resetForm = () => {
     phone: profile.value.phone || '',
     address: profile.value.address || ''
   }
+  selectedImage.value = null
+  imagePreview.value = null
   isEditing.value = false
 }
 
@@ -280,6 +311,18 @@ const validatePasswordForm = () => {
   }
 
   return !Object.values(passwordFieldErrors.value).some(error => error)
+}
+
+const onImageSelected = () => {
+  if (selectedImage.value && selectedImage.value[0]) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result
+      // Show immediate feedback
+      console.log('Image preview ready:', e.target.result.substring(0, 50) + '...')
+    }
+    reader.readAsDataURL(selectedImage.value[0])
+  }
 }
 
 const handlePasswordUpdate = async () => {

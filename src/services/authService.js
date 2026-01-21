@@ -83,13 +83,24 @@ export const authAPI = {
   },
 
   updateProfile: async (token, profileData) => {
+    let body;
+    let headers = {
+      'Authorization': `Bearer ${token}`,
+    };
+
+    // Check if profileData is FormData (for file upload) or regular object
+    if (profileData instanceof FormData) {
+      body = profileData;
+      // Don't set Content-Type header for FormData; browser will set it with proper boundary
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(profileData);
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(profileData),
+      headers: headers,
+      body: body,
     });
 
     if (!response.ok) {
@@ -168,13 +179,24 @@ export const usersAPI = {
   },
 
   createUser: async (token, userData) => {
+    let body;
+    let headers = {
+      'Authorization': `Bearer ${token}`,
+    };
+
+    // Check if userData is FormData (for file upload)
+    if (userData instanceof FormData) {
+      body = userData;
+      // Don't set Content-Type header for FormData; browser will set it with proper boundary
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(userData);
+    }
+
     const response = await fetch(`${API_BASE_URL}/users`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
+      headers: headers,
+      body: body,
     });
 
     if (!response.ok) {
@@ -186,13 +208,24 @@ export const usersAPI = {
   },
 
   updateUser: async (token, id, userData) => {
+    let body;
+    let headers = {
+      'Authorization': `Bearer ${token}`,
+    };
+
+    // Check if userData is FormData (for file upload)
+    if (userData instanceof FormData) {
+      body = userData;
+      // Don't set Content-Type header for FormData; browser will set it with proper boundary
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(userData);
+    }
+
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
+      headers: headers,
+      body: body,
     });
 
     if (!response.ok) {

@@ -31,7 +31,6 @@
         :items="users"
         :loading="loading"
         class="elevation-0"
-        @click:row="editUser"
       >
         <template #item.role="{ item }">
           <v-chip :color="getRoleColor(item.role?.name || item.role)" text-color="white" size="small">
@@ -50,16 +49,51 @@
     </v-card>
 
     <!-- Create/Edit User Dialog -->
-    <v-dialog v-model="showDialog" max-width="600px">
+    <v-dialog v-model="showDialog" max-width="600px" persistent>
       <v-card>
-        <v-card-title class="text-h6 bg-primary text-white">
-          {{ editingId ? 'Edit User' : 'Add New User' }}
+        <v-card-title class="text-h6 bg-primary text-white pa-4">
+          {{ editingId ? 'Edit User Profile' : 'Add New User' }}
         </v-card-title>
-        <v-card-text class="pt-6">
+        <v-card-text class="pt-6 px-6">
           <!-- Dialog Error Messages -->
           <v-alert v-if="dialogError" type="error" closable class="mb-4" @click:close="dialogError = ''">
             {{ dialogError }}
           </v-alert>
+
+          <!-- Image Upload Section -->
+          <v-row class="mb-6">
+            <v-col cols="12" class="d-flex flex-column align-center">
+              <p class="text-subtitle-2 font-weight-bold mb-3">Profile Picture</p>
+              <v-avatar size="120" class="mb-4" style="border: 3px solid #e3f2fd; background-color: #f5f5f5;">
+                <v-img 
+                  v-if="imagePreview || form.image"
+                  :src="imagePreview || form.image" 
+                  alt="User Avatar"
+                  cover
+                />
+                <span v-else class="text-disabled">
+                  <v-icon size="50">mdi-account-circle</v-icon>
+                </span>
+              </v-avatar>
+              <v-file-input
+                v-model="selectedImage"
+                label="Choose Profile Image"
+                accept="image/*"
+                prepend-icon="mdi-camera"
+                @change="onImageSelected"
+                variant="outlined"
+                density="compact"
+                clearable
+                class="mt-2"
+                style="max-width: 320px"
+                hint="JPG, PNG (Max 5MB)"
+              />
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4"></v-divider>
+
+          <p class="text-subtitle-2 font-weight-bold mb-4">Account Information</p>
 
           <v-row dense>
             <v-col cols="12" sm="6">
@@ -75,7 +109,7 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="form.email"
-                label="Email"
+                label="Email Address"
                 type="email"
                 variant="outlined"
                 density="comfortable"
@@ -83,6 +117,11 @@
                 :error-messages="formErrors.email"
               />
             </v-col>
+          </v-row>
+
+          <p class="text-subtitle-2 font-weight-bold mb-3 mt-2">Personal Details</p>
+
+          <v-row dense>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="form.firstName"
@@ -102,7 +141,7 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="form.phone"
-                label="Phone"
+                label="Phone Number"
                 variant="outlined"
                 density="comfortable"
               />
@@ -110,7 +149,7 @@
             <v-col cols="12" sm="6">
               <v-select
                 v-model="form.role"
-                label="Role"
+                label="User Role"
                 :items="roles"
                 item-title="name"
                 item-value="id"
@@ -142,11 +181,14 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-divider></v-divider>
         <v-card-actions class="pa-4">
           <v-spacer />
-          <v-btn variant="outlined" @click="closeDialog">Cancel</v-btn>
+          <v-btn variant="outlined" @click="closeDialog" :disabled="savingUser">
+            Cancel
+          </v-btn>
           <v-btn color="primary" variant="flat" @click="saveUser" :loading="savingUser">
-            {{ editingId ? 'Update' : 'Create' }}
+            {{ editingId ? 'Update User' : 'Create User' }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -210,8 +252,12 @@ const form = ref({
   lastName: '',
   phone: '',
   address: '',
+  image: '',
   role: null
 })
+
+const selectedImage = ref(null)
+const imagePreview = ref(null)
 
 const formErrors = ref({
   name: '',
@@ -284,8 +330,11 @@ const openCreateDialog = () => {
     lastName: '',
     phone: '',
     address: '',
+    image: '',
     role: null
   }
+  selectedImage.value = null
+  imagePreview.value = null
   dialogError.value = ''
   showDialog.value = true
 }
@@ -300,8 +349,11 @@ const editUser = (user) => {
     lastName: user.lastName || '',
     phone: user.phone || '',
     address: user.address || '',
+    image: user.image || '',
     role: user.role?.id || user.role
   }
+  selectedImage.value = null
+  imagePreview.value = null
   dialogError.value = ''
   showDialog.value = true
 }
@@ -314,18 +366,27 @@ const saveUser = async () => {
   savingUser.value = true
   dialogError.value = ''
 
-  const payload = {
-    name: form.value.name,
-    email: form.value.email,
-    firstName: form.value.firstName,
-    lastName: form.value.lastName,
-    phone: form.value.phone,
-    address: form.value.address,
-    role: form.value.role
+  // Always use FormData for consistency and image upload support
+  const payload = new FormData()
+  payload.append('name', form.value.name)
+  payload.append('email', form.value.email)
+  payload.append('firstName', form.value.firstName || '')
+  payload.append('lastName', form.value.lastName || '')
+  payload.append('phone', form.value.phone || '')
+  payload.append('address', form.value.address || '')
+  payload.append('role', form.value.role)
+  
+  // Add password for new users only
+  if (!editingId.value && form.value.password) {
+    payload.append('password', form.value.password)
   }
-
-  if (!editingId.value) {
-    payload.password = form.value.password
+  
+  // Add image if one was selected
+  if (selectedImage.value && selectedImage.value.length > 0) {
+    console.log('Adding image to payload:', selectedImage.value[0])
+    payload.append('image', selectedImage.value[0])
+  } else {
+    console.log('No image selected')
   }
 
   try {
@@ -380,8 +441,11 @@ const closeDialog = () => {
     lastName: '',
     phone: '',
     address: '',
+    image: '',
     role: null
   }
+  selectedImage.value = null
+  imagePreview.value = null
   dialogError.value = ''
 }
 
@@ -392,6 +456,28 @@ const getRoleColor = (role) => {
     user: 'blue'
   }
   return colors[role] || 'grey'
+}
+
+const onImageSelected = () => {
+  console.log('Image selected:', selectedImage.value)
+  if (selectedImage.value && selectedImage.value.length > 0) {
+    const file = selectedImage.value[0]
+    console.log('File details:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    })
+    
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result
+      console.log('Image preview set')
+    }
+    reader.readAsDataURL(file)
+  } else {
+    console.log('No file selected or selectedImage is empty')
+    imagePreview.value = null
+  }
 }
 
 onMounted(() => {

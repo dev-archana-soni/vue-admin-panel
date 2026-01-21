@@ -353,12 +353,12 @@ const fetchPermissions = async () => {
 }
 
 const getModulePermissions = (moduleId) => {
-  console.log('Getting permissions for module:', moduleId)
+  // console.log('Getting permissions for module:', moduleId)
   const filtered = permissions.value.filter(p => {
-    console.log('Checking permission:', p.name, 'module ID:', p.module?.id, 'against:', moduleId)
+    // console.log('Checking permission:', p.name, 'module ID:', p.module?.id, 'against:', moduleId)
     return p.module?.id === moduleId
   })
-  console.log('Filtered permissions:', filtered)
+  // console.log('Filtered permissions:', filtered)
   return filtered
 }
 
