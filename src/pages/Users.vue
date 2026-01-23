@@ -32,6 +32,17 @@
         :loading="loading"
         class="elevation-0"
       >
+        <template #item.image="{ item }">
+          <v-avatar size="40" class="my-2">
+            <v-img 
+              v-if="item.image"
+              :src="item.image" 
+              alt="User Avatar"
+              cover
+            />
+            <v-icon v-else color="grey">mdi-account-circle</v-icon>
+          </v-avatar>
+        </template>
         <template #item.role="{ item }">
           <v-chip :color="getRoleColor(item.role?.name || item.role)" text-color="white" size="small">
             {{ item.role?.name || item.role }}
@@ -222,6 +233,7 @@ import { usersAPI } from '@/services/authService'
 const { token } = useAuth()
 
 const headers = [
+  { title: 'Avatar', key: 'image', sortable: false },
   { title: 'Name', key: 'name' },
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phone' },
@@ -353,7 +365,8 @@ const editUser = (user) => {
     role: user.role?.id || user.role
   }
   selectedImage.value = null
-  imagePreview.value = null
+  // Set the image preview to the existing user's image
+  imagePreview.value = user.image || null
   dialogError.value = ''
   showDialog.value = true
 }
@@ -382,21 +395,41 @@ const saveUser = async () => {
   }
   
   // Add image if one was selected
-  if (selectedImage.value && selectedImage.value.length > 0) {
-    console.log('Adding image to payload:', selectedImage.value[0])
-    payload.append('image', selectedImage.value[0])
+  console.log('Selected image for upload:', selectedImage.value);
+  
+  // v-file-input returns a File object directly (not an array) when not using 'multiple'
+  if (selectedImage.value) {
+    // Normalize to array format to handle both single file and array cases
+    const files = Array.isArray(selectedImage.value) 
+      ? selectedImage.value 
+      : [selectedImage.value]
+    
+    if (files.length > 0 && files[0] instanceof File) {
+      console.log('Adding image to payload:', files[0])
+      payload.append('image', files[0])
+    } else {
+      console.log('No valid file object found')
+    }
   } else {
     console.log('No image selected')
   }
 
   try {
+    let response
     if (editingId.value) {
-      await usersAPI.updateUser(token.value, editingId.value, payload)
+      response = await usersAPI.updateUser(token.value, editingId.value, payload)
       successMessage.value = 'User updated successfully'
     } else {
-      await usersAPI.createUser(token.value, payload)
+      response = await usersAPI.createUser(token.value, payload)
       successMessage.value = 'User created successfully'
     }
+    
+    // Update the form with the response data (including the image URL from backend)
+    if (response.user && response.user.image) {
+      form.value.image = response.user.image
+      imagePreview.value = response.user.image
+    }
+    
     await fetchUsers()
     closeDialog()
   } catch (error) {
@@ -460,24 +493,33 @@ const getRoleColor = (role) => {
 
 const onImageSelected = () => {
   console.log('Image selected:', selectedImage.value)
-  if (selectedImage.value && selectedImage.value.length > 0) {
-    const file = selectedImage.value[0]
-    console.log('File details:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    })
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result
-      console.log('Image preview set')
-    }
-    reader.readAsDataURL(file)
-  } else {
-    console.log('No file selected or selectedImage is empty')
+
+  // v-file-input can provide a single File or an array; normalize to the first file
+  const files = Array.isArray(selectedImage.value)
+    ? selectedImage.value
+    : selectedImage.value
+      ? [selectedImage.value]
+      : []
+
+  if (!files.length) {
+    // console.log('No file selected or selectedImage is empty')
     imagePreview.value = null
+    return
   }
+
+  const file = files[0]
+  console.log('File details:', {
+    name: file.name,
+    type: file.type,
+    size: file.size
+  })
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target.result
+    console.log('Image preview set')
+  }
+  reader.readAsDataURL(file)
 }
 
 onMounted(() => {

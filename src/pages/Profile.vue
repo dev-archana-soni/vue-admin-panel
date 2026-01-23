@@ -231,6 +231,8 @@ const fetchProfile = async () => {
   errorMessage.value = ''
   try {
     const response = await authAPI.fetchProfile(token.value)
+    console.log('Fetched profile data:', response.user)
+    console.log('Profile image URL:', response.user.image)
     profile.value = response.user
     form.value = {
       firstName: response.user.firstName || '',
@@ -257,12 +259,32 @@ const updateProfile = async () => {
     formData.append('phone', form.value.phone)
     formData.append('address', form.value.address)
     
-    if (selectedImage.value && selectedImage.value[0]) {
-      formData.append('image', selectedImage.value[0])
+    // v-file-input returns a File object directly (not an array) when not using 'multiple'
+    if (selectedImage.value) {
+      // Normalize to array format to handle both single file and array cases
+      const files = Array.isArray(selectedImage.value) 
+        ? selectedImage.value 
+        : [selectedImage.value]
+      
+      if (files.length > 0 && files[0] instanceof File) {
+        console.log('Adding image to profile payload:', files[0])
+        formData.append('image', files[0])
+      } else {
+        console.log('No valid file object found in profile')
+      }
     }
 
     const response = await authAPI.updateProfile(token.value, formData)
+    console.log('Update profile response:', response)
+    console.log('Updated image URL:', response.user?.image)
     profile.value = response.user
+    
+    // Update the preview with the saved image URL from backend
+    if (response.user && response.user.image) {
+      profile.value.image = response.user.image
+      console.log('Profile image updated to:', profile.value.image)
+    }
+    
     imagePreview.value = null
     selectedImage.value = null
     isEditing.value = false
@@ -314,15 +336,33 @@ const validatePasswordForm = () => {
 }
 
 const onImageSelected = () => {
-  if (selectedImage.value && selectedImage.value[0]) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result
-      // Show immediate feedback
-      console.log('Image preview ready:', e.target.result.substring(0, 50) + '...')
-    }
-    reader.readAsDataURL(selectedImage.value[0])
+  console.log('Image selected in profile:', selectedImage.value)
+
+  // v-file-input can provide a single File or an array; normalize to the first file
+  const files = Array.isArray(selectedImage.value)
+    ? selectedImage.value
+    : selectedImage.value
+      ? [selectedImage.value]
+      : []
+
+  if (!files.length) {
+    imagePreview.value = null
+    return
   }
+
+  const file = files[0]
+  console.log('File details:', {
+    name: file.name,
+    type: file.type,
+    size: file.size
+  })
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target.result
+    console.log('Image preview set in profile')
+  }
+  reader.readAsDataURL(file)
 }
 
 const handlePasswordUpdate = async () => {

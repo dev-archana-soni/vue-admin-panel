@@ -10,7 +10,8 @@
       <v-divider />
       <v-list density="compact" nav>
         <template v-for="(item, idx) in menu" :key="idx">
-          <v-subheader v-if="item.header">{{ item.header }}</v-subheader>
+          <!-- Vuetify 3 replaced v-subheader with v-list-subheader -->
+          <v-list-subheader v-if="item.header">{{ item.header }}</v-list-subheader>
           <v-divider v-else-if="item.divider" />
           <v-list-group
             v-else-if="item.children"
@@ -54,13 +55,13 @@
         <template #activator="{ props }">
           <v-btn icon variant="text" v-bind="props">
             <v-avatar size="28">
-              <v-img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="User" />
+              <v-img :src="userProfile.image || 'https://cdn.vuetifyjs.com/images/john.jpg'" alt="User" />
             </v-avatar>
           </v-btn>
         </template>
         <v-list density="compact">
           <v-list-item to="/profile" title="Profile" prepend-icon="mdi-account-circle" />
-          <v-list-item title="Settings" prepend-icon="mdi-cog-outline" />
+          <v-list-item to="/settings" title="Settings" prepend-icon="mdi-cog-outline" />
           <v-divider />
           <v-list-item title="Logout" prepend-icon="mdi-logout" @click="handleLogout" />
         </v-list>
@@ -77,20 +78,37 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { useAuth } from '@/composables/useAuth'
+import { authAPI } from '@/services/authService'
 import { menu } from './data/menu'
 
 const drawer = ref(true)
 const theme = useTheme()
 const route = useRoute()
 const router = useRouter()
-const { logout } = useAuth()
+const { logout, token } = useAuth()
+
+const userProfile = ref({
+  image: ''
+})
 
 const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500']
 const isPublicPage = computed(() => publicRoutes.includes(route.path))
+
+const fetchUserProfile = async () => {
+  if (!token.value || isPublicPage.value) return
+  
+  try {
+    const response = await authAPI.fetchProfile(token.value)
+    userProfile.value = response.user
+    console.log('Header: User profile loaded', userProfile.value.image)
+  } catch (error) {
+    console.error('Failed to load user profile in header:', error)
+  }
+}
 
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
@@ -102,6 +120,18 @@ const handleLogout = async () => {
   await logout()
   router.push('/login')
 }
+
+// Fetch profile when component mounts
+onMounted(() => {
+  fetchUserProfile()
+})
+
+// Fetch profile when navigating to non-public pages
+watch(() => route.path, () => {
+  if (!isPublicPage.value && token.value) {
+    fetchUserProfile()
+  }
+})
 </script>
 
 <style scoped>

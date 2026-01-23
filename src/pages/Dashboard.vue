@@ -10,7 +10,7 @@
     <v-col cols="12" sm="6" md="3">
       <v-card class="pa-4">
         <div class="text-subtitle-1 text-medium-emphasis">Revenue</div>
-        <div class="text-h4 font-weight-medium">$23,450</div>
+        <div class="text-h4 font-weight-medium">₹{{ totalIncome.toFixed(2) }}</div>
         <v-progress-linear model-value="64" color="primary" rounded height="6" class="mt-3" />
       </v-card>
     </v-col>
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import { Bar, Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js'
@@ -97,6 +97,34 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const theme = useTheme()
 const isDark = computed(() => theme.global.current.value.dark)
+const totalIncome = ref(0)
+
+onMounted(async () => {
+  await fetchTotalIncome()
+})
+
+async function fetchTotalIncome() {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await fetch('http://localhost:5000/api/income', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch incomes')
+    }
+
+    const data = await response.json()
+    const incomes = data.incomes || []
+    totalIncome.value = incomes.reduce((sum, income) => sum + income.amount, 0)
+  } catch (error) {
+    console.error('Error fetching income total:', error)
+    totalIncome.value = 0
+  }
+}
 
 const chartData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
