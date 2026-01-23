@@ -5,6 +5,7 @@ export const menu = [
   { title: 'User Groups', icon: 'mdi-account-group', to: '/user-groups' },
   { title: 'Categories', icon: 'mdi-shape', to: '/categories' },
   { title: 'Income', icon: 'mdi-cash-plus', to: '/income' },
+  { title: 'Expense', icon: 'mdi-cash-minus', to: '/expense' },
   { title: 'Chat', icon: 'mdi-chat', to: '/chat' },
   { title: 'Inbox', icon: 'mdi-email', to: '/mail' },
   { title: 'Media', icon: 'mdi-filmstrip', to: '/media' },

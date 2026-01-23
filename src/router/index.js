@@ -17,6 +17,7 @@ import Permissions from '@/pages/security/Permissions.vue'
 import UserGroups from '@/pages/UserGroups.vue'
 import Categories from '@/pages/Categories.vue'
 import Income from '@/pages/Income.vue'
+import Expense from '@/pages/Expense.vue'
 
 const placeholder = (path, title, name) => ({ path, name: name || path, component: Placeholder, props: { title } })
 
@@ -31,6 +32,7 @@ const routes = [
   { path: '/user-groups', name: 'user-groups', component: UserGroups, meta: { requiresAuth: true } },
   { path: '/categories', name: 'categories', component: Categories, meta: { requiresAuth: true } },
   { path: '/income', name: 'income', component: Income, meta: { requiresAuth: true } },
+  { path: '/expense', name: 'expense', component: Expense, meta: { requiresAuth: true } },
   // Apps
   { path: '/chat', name: 'chat', component: ChatDemo, meta: { requiresAuth: true } },
   { path: '/mail', name: 'mail', component: Inbox, meta: { requiresAuth: true } },

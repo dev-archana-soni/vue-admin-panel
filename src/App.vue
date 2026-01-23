@@ -3,9 +3,9 @@
     <v-navigation-drawer v-if="!isPublicPage" v-model="drawer" app :width="260">
       <div class="d-flex align-center px-4 py-3">
         <v-avatar size="32" class="mr-3">
-          <v-img src="/m.png" alt="Vue Material" />
+          <v-img :src="userProfile.image || '/m.png'" :alt="userProfile.name || 'User'" />
         </v-avatar>
-        <span class="text-subtitle-1 font-weight-medium">Vue Material</span>
+        <span class="text-subtitle-1 font-weight-medium">{{ userProfile.name || 'User' }} ({{ userProfile.role || 'Loading...' }})</span>
       </div>
       <v-divider />
       <v-list density="compact" nav>
@@ -47,7 +47,7 @@
 
     <v-app-bar v-if="!isPublicPage" app flat color="primary" density="comfortable" dark>
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-toolbar-title>Vue Material</v-toolbar-title>
+      <v-toolbar-title>{{ userProfile.name || 'User' }} ({{ userProfile.role || 'Loading...' }})</v-toolbar-title>
       <v-spacer />
       <v-btn :icon="theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'" variant="text" @click="toggleTheme" class="mr-1" />
       <v-btn icon="mdi-bell-outline" variant="text" class="mr-1" />
@@ -92,7 +92,9 @@ const router = useRouter()
 const { logout, token } = useAuth()
 
 const userProfile = ref({
-  image: ''
+  name: '',
+  image: '',
+  role: ''
 })
 
 const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500']
