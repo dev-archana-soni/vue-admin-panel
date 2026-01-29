@@ -33,8 +33,17 @@
           :items-per-page="10"
           class="elevation-1"
         >
+          <template v-slot:item.type="{ item }">
+            <v-chip size="small" :color="item.type === 'group' ? 'primary' : 'success'" variant="flat">
+              {{ item.type === 'group' ? 'Group' : 'Own' }}
+            </v-chip>
+          </template>
           <template v-slot:item.amount="{ item }">
-            <span class="font-weight-bold text-error">₹{{ item.amount.toFixed(2) }}</span>
+            <div v-if="item.type === 'group'">
+              <div class="font-weight-bold text-error">₹{{ item.amount.toFixed(2) }}</div>
+              <div class="text-caption text-grey">Total: ₹{{ (item.totalAmount || item.amount).toFixed(2) }}</div>
+            </div>
+            <span v-else class="font-weight-bold text-error">₹{{ item.amount.toFixed(2) }}</span>
           </template>
           <template v-slot:item.category="{ item }">
             <v-chip size="small" color="error" variant="flat">
@@ -114,6 +123,46 @@
               class="mb-3"
             ></v-text-field>
 
+            <v-radio-group
+              v-model="formData.type"
+              label="Expense Type *"
+              class="mb-3"
+            >
+              <v-radio value="own" label="Own Expense"></v-radio>
+              <v-radio value="group" label="Group Expense"></v-radio>
+            </v-radio-group>
+
+            <v-select
+              v-if="formData.type === 'group'"
+              v-model="formData.userGroup"
+              :items="userGroups"
+              item-title="name"
+              item-value="id"
+              label="Select User Group *"
+              variant="outlined"
+              :rules="[v => !!v || 'User group is required']"
+              class="mb-3"
+              @update:modelValue="fetchGroupMembers"
+            ></v-select>
+
+            <div v-if="formData.type === 'group' && groupMembers.length > 0" class="mb-4">
+              <label class="text-body2 font-weight-bold mb-2 d-block">Select Members *</label>
+              <v-row>
+                <v-col v-for="member in groupMembers" :key="member.id" cols="12" md="6">
+                  <v-checkbox
+                    v-model="formData.participants"
+                    :value="member.id"
+                    :label="`${member.name} (${member.email})`"
+                    color="error"
+                  ></v-checkbox>
+                </v-col>
+              </v-row>
+              <div v-if="formData.participants.length > 0" class="mt-3 pa-3 bg-error-light rounded">
+                <div class="text-body2"><strong>Total Amount:</strong> ₹{{ parseFloat(formData.amount).toFixed(2) }}</div>
+                <div class="text-body2"><strong>Split Among {{ splitCount }} Members:</strong> ₹{{ amountPerPerson }} each</div>
+              </div>
+            </div>
+
             <v-textarea
               v-model="formData.description"
               label="Description"
@@ -148,16 +197,22 @@ export default {
       errorMessage: '',
       expenses: [],
       categories: [],
+      userGroups: [],
+      groupMembers: [],
       formData: {
         id: null,
         title: '',
         amount: '',
         description: '',
         category: null,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        type: 'own',
+        userGroup: null,
+        participants: []
       },
       headers: [
         { title: 'Title', key: 'title', sortable: true },
+        { title: 'Type', key: 'type', sortable: true },
         { title: 'Amount', key: 'amount', sortable: true },
         { title: 'Category', key: 'category', sortable: false },
         { title: 'Date', key: 'date', sortable: true },
@@ -169,11 +224,26 @@ export default {
   computed: {
     expenseCategories() {
       return this.categories.filter(cat => cat.type === 'expense');
+    },
+    splitCount() {
+      if (this.formData.type === 'group') {
+        return (this.formData.participants?.length || 0) + 1; // include self
+      }
+      return 1;
+    },
+    amountPerPerson() {
+      const total = parseFloat(this.formData.amount) || 0;
+      if (this.formData.type === 'group') {
+        const count = this.splitCount || 1;
+        return (total / count).toFixed(2);
+      }
+      return total.toFixed(2);
     }
   },
   mounted() {
     this.fetchExpenses();
     this.fetchCategories();
+    this.fetchUserGroups();
   },
   methods: {
     async fetchExpenses() {
@@ -223,6 +293,49 @@ export default {
       }
     },
 
+    async fetchUserGroups() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/user-groups', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user groups');
+        }
+
+        const data = await response.json();
+        this.userGroups = data.groups || [];
+      } catch (error) {
+        console.error('Error fetching user groups:', error);
+      }
+    },
+
+    async fetchGroupMembers(groupId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:5000/api/user-groups/${groupId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch group members');
+        }
+
+        const data = await response.json();
+        this.groupMembers = data.group?.members || [];
+      } catch (error) {
+        console.error('Error fetching group members:', error);
+        this.errorMessage = 'Failed to load group members';
+      }
+    },
+
     openCreateDialog() {
       this.isEditMode = false;
       this.formData = {
@@ -231,8 +344,12 @@ export default {
         amount: '',
         description: '',
         category: null,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        type: 'own',
+        userGroup: null,
+        participants: []
       };
+      this.groupMembers = [];
       this.dialog = true;
     },
 
@@ -241,11 +358,15 @@ export default {
       this.formData = {
         id: expense.id,
         title: expense.title,
-        amount: expense.amount,
+        amount: expense.totalAmount || expense.amount,
         description: expense.description || '',
         category: expense.category?.id || null,
-        date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        type: expense.type || 'own',
+        userGroup: expense.userGroup?.id || null,
+        participants: expense.participants || []
       };
+      this.groupMembers = expense.userGroup?.members || [];
       this.dialog = true;
     },
 
@@ -257,8 +378,12 @@ export default {
         amount: '',
         description: '',
         category: null,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        type: 'own',
+        userGroup: null,
+        participants: []
       };
+      this.groupMembers = [];
     },
 
     async saveExpense() {
@@ -285,7 +410,10 @@ export default {
             amount: parseFloat(this.formData.amount),
             description: this.formData.description,
             category: this.formData.category,
-            date: this.formData.date
+            date: this.formData.date,
+            type: this.formData.type,
+            userGroup: this.formData.userGroup || null,
+            participants: this.formData.participants || []
           })
         });
 
