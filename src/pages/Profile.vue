@@ -16,9 +16,19 @@
     <v-row>
       <v-col cols="12" md="4">
         <v-card class="pa-6 d-flex flex-column align-center">
-          <v-avatar size="96" class="mb-4">
-            <v-img :src="imagePreview || profile.image || 'https://cdn.vuetifyjs.com/images/john.jpg'" alt="Profile" />
-          </v-avatar>
+          <v-badge
+            badge-color="primary"
+            icon="mdi-account-circle"
+            overlap
+            bordered
+            offset-x="10"
+            offset-y="10"
+            class="mb-4"
+          >
+            <v-avatar size="96">
+              <v-img :src="imagePreview || profile.image || 'https://cdn.vuetifyjs.com/images/john.jpg'" alt="Profile" />
+            </v-avatar>
+          </v-badge>
           <div v-if="isEditing" class="mb-3">
             <v-file-input
               v-model="selectedImage"

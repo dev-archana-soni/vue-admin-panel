@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12">
         <div class="d-flex align-center mb-4">
+          <v-icon size="large" class="mr-3">mdi-filmstrip</v-icon>
           <h1 class="text-h4">Media Library</h1>
           <v-spacer />
           <v-btn color="primary" prepend-icon="mdi-upload" @click="uploadDialog = true">
@@ -245,13 +246,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
   </v-container>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import MediaUpload from '@/components/MediaUpload.vue'
 import MediaViewer from '@/components/MediaViewer.vue'
+import { useAuth } from '@/composables/useAuth'
+import { mediaAPI } from '@/services/authService'
+
+const { token } = useAuth()
 
 const searchQuery = ref('')
 const filterType = ref('all')
@@ -280,160 +286,7 @@ const sortOptions = [
   { title: 'Smallest First', value: 'size-asc' }
 ]
 
-const mediaLibrary = ref([
-  {
-    id: 1,
-    name: 'mountain-landscape.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '2.4 MB',
-    sizeBytes: 2516582,
-    url: 'https://picsum.photos/800/600?random=1',
-    thumbnail: 'https://picsum.photos/400/300?random=1',
-    dimensions: '1920 x 1080',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 86400000)
-  },
-  {
-    id: 2,
-    name: 'beach-sunset.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '3.1 MB',
-    sizeBytes: 3250176,
-    url: 'https://picsum.photos/800/600?random=2',
-    thumbnail: 'https://picsum.photos/400/300?random=2',
-    dimensions: '2560 x 1440',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 172800000)
-  },
-  {
-    id: 3,
-    name: 'city-lights.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '1.8 MB',
-    sizeBytes: 1887436,
-    url: 'https://picsum.photos/800/600?random=3',
-    thumbnail: 'https://picsum.photos/400/300?random=3',
-    dimensions: '1920 x 1080',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 259200000)
-  },
-  {
-    id: 4,
-    name: 'presentation.mp4',
-    type: 'video',
-    format: 'mp4',
-    size: '45.2 MB',
-    sizeBytes: 47401738,
-    url: '#',
-    thumbnail: '',
-    dimensions: '1920 x 1080',
-    mimeType: 'video/mp4',
-    uploadedAt: new Date(Date.now() - 345600000)
-  },
-  {
-    id: 5,
-    name: 'podcast-episode.mp3',
-    type: 'audio',
-    format: 'mp3',
-    size: '8.5 MB',
-    sizeBytes: 8912896,
-    url: '#',
-    thumbnail: '',
-    mimeType: 'audio/mpeg',
-    uploadedAt: new Date(Date.now() - 432000000)
-  },
-  {
-    id: 6,
-    name: 'project-proposal.pdf',
-    type: 'document',
-    format: 'pdf',
-    size: '1.2 MB',
-    sizeBytes: 1258291,
-    url: '#',
-    thumbnail: '',
-    mimeType: 'application/pdf',
-    uploadedAt: new Date(Date.now() - 518400000)
-  },
-  {
-    id: 7,
-    name: 'forest-path.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '2.9 MB',
-    sizeBytes: 3041689,
-    url: 'https://picsum.photos/800/600?random=4',
-    thumbnail: 'https://picsum.photos/400/300?random=4',
-    dimensions: '3840 x 2160',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 604800000)
-  },
-  {
-    id: 8,
-    name: 'annual-report.xlsx',
-    type: 'document',
-    format: 'xlsx',
-    size: '3.4 MB',
-    sizeBytes: 3565158,
-    url: '#',
-    thumbnail: '',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    uploadedAt: new Date(Date.now() - 691200000)
-  },
-  {
-    id: 9,
-    name: 'ocean-waves.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '4.2 MB',
-    sizeBytes: 4404019,
-    url: 'https://picsum.photos/800/600?random=5',
-    thumbnail: 'https://picsum.photos/400/300?random=5',
-    dimensions: '4096 x 2160',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 777600000)
-  },
-  {
-    id: 10,
-    name: 'tutorial-video.mp4',
-    type: 'video',
-    format: 'mp4',
-    size: '120.5 MB',
-    sizeBytes: 126357913,
-    url: '#',
-    thumbnail: '',
-    dimensions: '1920 x 1080',
-    mimeType: 'video/mp4',
-    uploadedAt: new Date(Date.now() - 864000000)
-  },
-  {
-    id: 11,
-    name: 'desert-dunes.jpg',
-    type: 'image',
-    format: 'jpg',
-    size: '3.7 MB',
-    sizeBytes: 3880550,
-    url: 'https://picsum.photos/800/600?random=6',
-    thumbnail: 'https://picsum.photos/400/300?random=6',
-    dimensions: '3200 x 2400',
-    mimeType: 'image/jpeg',
-    uploadedAt: new Date(Date.now() - 950400000)
-  },
-  {
-    id: 12,
-    name: 'meeting-notes.docx',
-    type: 'document',
-    format: 'docx',
-    size: '856 KB',
-    sizeBytes: 876748,
-    url: '#',
-    thumbnail: '',
-    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    uploadedAt: new Date(Date.now() - 1036800000)
-  }
-])
+const mediaLibrary = ref([])
 
 const filteredMedia = computed(() => {
   let filtered = [...mediaLibrary.value]
@@ -446,9 +299,13 @@ const filteredMedia = computed(() => {
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(m =>
-      m.name.toLowerCase().includes(query)
-    )
+    filtered = filtered.filter(m => {
+      const name = (m.name || '').toLowerCase()
+      const type = (m.type || '').toLowerCase()
+      const format = (m.format || '').toLowerCase()
+      const mimeType = (m.mimeType || '').toLowerCase()
+      return name.includes(query) || type.includes(query) || format.includes(query) || mimeType.includes(query)
+    })
   }
 
   // Sort
@@ -482,7 +339,9 @@ const viewMedia = (media) => {
 }
 
 const downloadMedia = (media) => {
-  console.log('Downloading:', media.name)
+  if (media?.url) {
+    window.open(media.url, '_blank')
+  }
 }
 
 const confirmDelete = (media) => {
@@ -498,33 +357,43 @@ const deleteMediaConfirmed = () => {
   mediaToDelete.value = null
 }
 
-const handleDelete = (media) => {
-  const index = mediaLibrary.value.findIndex(m => m.id === media.id)
-  if (index !== -1) {
-    mediaLibrary.value.splice(index, 1)
+const handleDelete = async (media) => {
+  try {
+    await mediaAPI.deleteMedia(token.value, media.id)
+    const index = mediaLibrary.value.findIndex(m => m.id === media.id)
+    if (index !== -1) {
+      mediaLibrary.value.splice(index, 1)
+    }
+  } catch (error) {
+    console.error('Delete media error:', error)
+  } finally {
+    viewerDialog.value = false
   }
-  viewerDialog.value = false
 }
 
-const handleUpload = (files) => {
-  console.log('Uploading files:', files)
-  // Simulate adding uploaded files to library
-  files.forEach((file, index) => {
-    const newMedia = {
-      id: mediaLibrary.value.length + index + 1,
-      name: file.name,
-      type: getFileType(file.type),
-      format: file.name.split('.').pop(),
-      size: formatFileSize(file.size),
-      sizeBytes: file.size,
-      url: URL.createObjectURL(file),
-      thumbnail: file.type.startsWith('image/') ? URL.createObjectURL(file) : '',
-      mimeType: file.type,
-      uploadedAt: new Date()
-    }
-    mediaLibrary.value.unshift(newMedia)
-  })
+const handleUpload = async (files) => {
+  if (!files?.length) return
+  try {
+    await mediaAPI.uploadMedia(token.value, files)
+    await fetchMedia()
+  } catch (error) {
+    console.error('Upload media error:', error)
+  }
 }
+
+const fetchMedia = async () => {
+  if (!token.value) return
+  try {
+    const response = await mediaAPI.getAllMedia(token.value)
+    mediaLibrary.value = response.media || []
+  } catch (error) {
+    console.error('Fetch media error:', error)
+  }
+}
+
+onMounted(() => {
+  fetchMedia()
+})
 
 const getFileType = (mimeType) => {
   if (mimeType.startsWith('image/')) return 'image'
@@ -542,8 +411,11 @@ const formatFileSize = (bytes) => {
 }
 
 const formatDate = (date) => {
+  const parsedDate = date instanceof Date ? date : new Date(date)
+  if (Number.isNaN(parsedDate.getTime())) return ''
+
   const now = new Date()
-  const diffMs = now - date
+  const diffMs = now - parsedDate
   const diffDays = Math.floor(diffMs / 86400000)
 
   if (diffDays === 0) return 'Today'
@@ -551,7 +423,7 @@ const formatDate = (date) => {
   if (diffDays < 7) return `${diffDays} days ago`
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
 
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 const getMediaIcon = (type) => {

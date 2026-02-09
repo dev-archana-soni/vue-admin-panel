@@ -15,7 +15,10 @@
 
     <v-row class="mb-4">
       <v-col cols="12">
-        <div class="text-h5">Settings</div>
+        <div class="d-flex align-center">
+          <v-icon size="large" class="mr-3">mdi-cog-outline</v-icon>
+          <div class="text-h5">Settings</div>
+        </div>
       </v-col>
     </v-row>
 

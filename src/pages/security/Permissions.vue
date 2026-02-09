@@ -15,7 +15,10 @@
 
     <v-row class="mb-4">
       <v-col cols="12" md="6">
-        <div class="text-h5">Modules & Permissions</div>
+        <div class="d-flex align-center">
+          <v-icon size="large" class="mr-3">mdi-lock-multiple</v-icon>
+          <div class="text-h5">Modules & Permissions</div>
+        </div>
       </v-col>
       <v-col cols="12" md="6" class="text-end">
         <v-btn color="primary" variant="flat" @click="showModuleDialog = true" class="mr-2">
@@ -32,19 +35,23 @@
       <v-expansion-panels>
         <v-expansion-panel v-for="module in modules" :key="module.id">
           <template #title>
-            <v-icon size="small" class="mr-2">{{ module.icon || 'mdi-puzzle' }}</v-icon>
-            <strong>{{ module.displayName }}</strong>
-            <v-chip v-if="!module.isActive" size="small" color="grey" text-color="white" class="ml-2">
-              Inactive
-            </v-chip>
-          </template>
-          <template #actions>
-            <v-btn icon size="small" color="primary" @click.stop="editModule(module)">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn icon size="small" color="error" @click.stop="deleteModuleDialog(module)">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
+            <div class="d-flex align-center justify-space-between w-100">
+              <div class="d-flex align-center flex-grow-1">
+                <v-icon size="small" class="mr-2">{{ module.icon || 'mdi-puzzle' }}</v-icon>
+                <strong>{{ module.displayName }}</strong>
+                <v-chip v-if="!module.isActive" size="small" color="grey" text-color="white" class="ml-2">
+                  Inactive
+                </v-chip>
+              </div>
+              <div class="d-flex gap-2" @click.stop>
+                <v-btn icon size="x-small" color="primary" @click.stop="editModule(module)" variant="text">
+                  <v-icon size="small">mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn icon size="x-small" color="error" @click.stop="deleteModuleDialog(module)" variant="text">
+                  <v-icon size="small">mdi-delete</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </template>
           <v-expansion-panel-text>
             <v-divider class="mb-4"></v-divider>
@@ -542,5 +549,23 @@ onMounted(() => {
 <style scoped>
 :deep(.v-expansion-panel) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+:deep(.v-expansion-panel__title) {
+  padding: 0 !important;
+}
+
+.d-flex.align-center.justify-space-between {
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+/* Show buttons on hover */
+.v-expansion-panel:hover .d-flex.gap-2 {
+  opacity: 1;
 }
 </style>

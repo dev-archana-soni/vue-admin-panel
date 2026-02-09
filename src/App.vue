@@ -28,6 +28,7 @@
               v-for="child in item.children"
               :key="child.to"
               :to="child.to"
+              :prepend-icon="child.icon"
               :title="child.title"
               color="primary"
               density="comfortable"

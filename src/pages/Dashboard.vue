@@ -2,28 +2,40 @@
   <v-row dense>
     <v-col cols="12" sm="6" md="3">
       <v-card class="pa-4">
-        <div class="text-subtitle-1 text-medium-emphasis">Users</div>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-subtitle-1 text-medium-emphasis">Users</div>
+          <v-icon size="large" color="primary">mdi-account-multiple</v-icon>
+        </div>
         <div class="text-h4 font-weight-medium">1,248</div>
         <div class="text-caption text-medium-emphasis">+4.2% vs last week</div>
       </v-card>
     </v-col>
     <v-col cols="12" sm="6" md="3">
       <v-card class="pa-4">
-        <div class="text-subtitle-1 text-medium-emphasis">Revenue</div>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-subtitle-1 text-medium-emphasis">Revenue</div>
+          <v-icon size="large" color="success">mdi-cash-multiple</v-icon>
+        </div>
         <div class="text-h4 font-weight-medium">₹{{ totalIncome.toFixed(2) }}</div>
         <v-progress-linear model-value="64" color="primary" rounded height="6" class="mt-3" />
       </v-card>
     </v-col>
     <v-col cols="12" sm="6" md="3">
       <v-card class="pa-4">
-        <div class="text-subtitle-1 text-medium-emphasis">Open Tickets</div>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-subtitle-1 text-medium-emphasis">Open Tickets</div>
+          <v-icon size="large" color="warning">mdi-ticket-outline</v-icon>
+        </div>
         <div class="text-h4 font-weight-medium">54</div>
         <div class="text-caption text-medium-emphasis">Avg. 2h 13m</div>
       </v-card>
     </v-col>
     <v-col cols="12" sm="6" md="3">
       <v-card class="pa-4">
-        <div class="text-subtitle-1 text-medium-emphasis">Bounce Rate</div>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-subtitle-1 text-medium-emphasis">Bounce Rate</div>
+          <v-icon size="large" color="error">mdi-trending-down</v-icon>
+        </div>
         <div class="text-h4 font-weight-medium">32%</div>
         <v-progress-linear model-value="32" color="error" rounded height="6" class="mt-3" />
       </v-card>

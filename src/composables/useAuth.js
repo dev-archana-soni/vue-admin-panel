@@ -3,6 +3,7 @@ import { authAPI } from '../services/authService';
 
 const token = ref(localStorage.getItem('token') || null);
 const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
+const sessionChecked = ref(false);
 
 export function useAuth() {
   const isAuthenticated = computed(() => !!token.value);
@@ -21,6 +22,7 @@ export function useAuth() {
     const result = await authAPI.login(email, password);
     setToken(result.token);
     setUser(result.user);
+    sessionChecked.value = true;
     return result;
   };
 
@@ -28,6 +30,7 @@ export function useAuth() {
     const result = await authAPI.register(email, password, name);
     setToken(result.token);
     setUser(result.user);
+    sessionChecked.value = true;
     return result;
   };
 
@@ -42,8 +45,33 @@ export function useAuth() {
     } finally {
       token.value = null;
       user.value = null;
+      sessionChecked.value = false;
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+    }
+  };
+
+  const ensureSession = async () => {
+    if (!token.value) {
+      sessionChecked.value = true;
+      return false;
+    }
+
+    if (sessionChecked.value) {
+      return true;
+    }
+
+    try {
+      const result = await authAPI.getProfile(token.value);
+      if (result?.user) {
+        setUser(result.user);
+      }
+      sessionChecked.value = true;
+      return true;
+    } catch (error) {
+      await logout();
+      sessionChecked.value = true;
+      return false;
     }
   };
 
@@ -54,5 +82,6 @@ export function useAuth() {
     login,
     register,
     logout,
+    ensureSession,
   };
 }

@@ -10,6 +10,10 @@
             </v-btn>
 
             <v-list density="compact" nav>
+              <v-list-subheader class="text-uppercase text-caption font-weight-bold">
+                <v-icon size="x-small" class="mr-2">mdi-email</v-icon>
+                Folders
+              </v-list-subheader>
               <v-list-item
                 v-for="folder in folders"
                 :key="folder.value"

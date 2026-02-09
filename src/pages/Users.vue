@@ -15,7 +15,10 @@
 
     <v-row class="mb-4">
       <v-col cols="12" md="8">
-        <div class="text-h5">Users Management</div>
+        <div class="d-flex align-center">
+          <v-icon size="large" class="mr-3">mdi-account-multiple</v-icon>
+          <div class="text-h5">Users Management</div>
+        </div>
       </v-col>
       <v-col cols="12" md="4" class="text-end">
         <v-btn color="primary" variant="flat" @click="openCreateDialog">

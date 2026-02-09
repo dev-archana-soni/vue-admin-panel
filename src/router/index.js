@@ -12,10 +12,12 @@ import Placeholder from '@/pages/Placeholder.vue'
 import ChatDemo from '@/pages/ChatDemo.vue'
 import Inbox from '@/pages/Inbox.vue'
 import Media from '@/pages/Media.vue'
+import SendMail from '@/pages/SendMail.vue'
 import Roles from '@/pages/security/Roles.vue'
 import Permissions from '@/pages/security/Permissions.vue'
 import UserGroups from '@/pages/UserGroups.vue'
 import Categories from '@/pages/Categories.vue'
+import Products from '@/pages/Products.vue'
 import Income from '@/pages/Income.vue'
 import Expense from '@/pages/Expense.vue'
 import Items from '@/pages/Items.vue'
@@ -33,6 +35,7 @@ const routes = [
   { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true } },
   { path: '/user-groups', name: 'user-groups', component: UserGroups, meta: { requiresAuth: true } },
   { path: '/categories', name: 'categories', component: Categories, meta: { requiresAuth: true } },
+  { path: '/products', name: 'products', component: Products, meta: { requiresAuth: true } },
   { path: '/income', name: 'income', component: Income, meta: { requiresAuth: true } },
   { path: '/expense', name: 'expense', component: Expense, meta: { requiresAuth: true } },
   { path: '/items', name: 'items', component: Items, meta: { requiresAuth: true } },
@@ -41,6 +44,7 @@ const routes = [
   { path: '/chat', name: 'chat', component: ChatDemo, meta: { requiresAuth: true } },
   { path: '/mail', name: 'mail', component: Inbox, meta: { requiresAuth: true } },
   { path: '/media', name: 'media', component: Media, meta: { requiresAuth: true } },
+  { path: '/media/send-mail', name: 'send-mail', component: SendMail, meta: { requiresAuth: true } },
   // Security
   { path: '/security/roles', name: 'roles', component: Roles, meta: { requiresAuth: true } },
   { path: '/security/permissions', name: 'permissions', component: Permissions, meta: { requiresAuth: true } },
@@ -57,17 +61,23 @@ const router = createRouter({
 })
 
 // Route guard for authentication
-router.beforeEach((to, from, next) => {
-  const { isAuthenticated } = useAuth()
+router.beforeEach(async (to, from, next) => {
+  const { isAuthenticated, ensureSession } = useAuth()
 
   // If route requires auth and user is not authenticated
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return next({ name: 'login', query: { redirect: to.fullPath } })
+  if (to.meta.requiresAuth) {
+    const ok = await ensureSession()
+    if (!ok) {
+      return next({ name: 'login', query: { redirect: to.fullPath } })
+    }
   }
 
   // If user is logged in and trying to access login/register, redirect to dashboard
-  if ((to.name === 'login' || to.name === 'register') && isAuthenticated.value) {
-    return next({ name: 'dashboard' })
+  if (to.name === 'login' || to.name === 'register') {
+    const ok = await ensureSession()
+    if (ok) {
+      return next({ name: 'dashboard' })
+    }
   }
 
   next()

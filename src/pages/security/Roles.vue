@@ -15,7 +15,10 @@
 
     <v-row class="mb-4">
       <v-col cols="12" md="8">
-        <div class="text-h5">Roles Management</div>
+        <div class="d-flex align-center">
+          <v-icon size="large" class="mr-3">mdi-shield-account</v-icon>
+          <div class="text-h5">Roles Management</div>
+        </div>
       </v-col>
       <v-col cols="12" md="4" class="text-end">
         <v-btn color="primary" variant="flat" @click="openCreateDialog">
@@ -32,6 +35,24 @@
         :loading="loading"
         class="elevation-0"
       >
+        <template #column.name="{ column }">
+          <div class="d-flex align-center gap-2">
+            <v-icon size="small">mdi-shield</v-icon>
+            {{ column.title }}
+          </div>
+        </template>
+        <template #column.description="{ column }">
+          <div class="d-flex align-center gap-2">
+            <v-icon size="small">mdi-information</v-icon>
+            {{ column.title }}
+          </div>
+        </template>
+        <template #column.isActive="{ column }">
+          <div class="d-flex align-center gap-2">
+            <v-icon size="small">mdi-check-circle</v-icon>
+            {{ column.title }}
+          </div>
+        </template>
         <template #item.isActive="{ item }">
           <v-chip :color="item.isActive ? 'success' : 'grey'" text-color="white" size="small">
             {{ item.isActive ? 'Active' : 'Inactive' }}
@@ -100,10 +121,9 @@
                     <v-row dense>
                       <v-col v-for="perm in module.permissions" :key="perm.id" cols="12" sm="6">
                         <v-checkbox
-                          :model-value="form.permissions.includes(perm.id)"
+                          v-model="form.permissions"
                           :label="perm.name"
                           :value="perm.id"
-                          @update:model-value="togglePermission(perm.id)"
                           density="comfortable"
                           hide-details
                         />
@@ -153,9 +173,9 @@ import { rolesAPI, modulesAPI, permissionsAPI } from '@/services/authService'
 const { token } = useAuth()
 
 const headers = [
-  { title: 'Role Name', key: 'name' },
-  { title: 'Description', key: 'description' },
-  { title: 'Status', key: 'isActive' },
+  { title: 'Role Name', key: 'name', icon: 'mdi-shield' },
+  { title: 'Description', key: 'description', icon: 'mdi-information' },
+  { title: 'Status', key: 'isActive', icon: 'mdi-check-circle' },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
 
@@ -311,15 +331,6 @@ const closeDialog = () => {
     permissions: []
   }
   dialogError.value = ''
-}
-
-const togglePermission = (permissionId) => {
-  const index = form.value.permissions.indexOf(permissionId)
-  if (index > -1) {
-    form.value.permissions.splice(index, 1)
-  } else {
-    form.value.permissions.push(permissionId)
-  }
 }
 
 onMounted(() => {

@@ -2,7 +2,10 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 mb-4">Chat Component</h1>
+        <div class="d-flex align-center mb-4">
+          <v-icon size="large" class="mr-3">mdi-chat</v-icon>
+          <h1 class="text-h4">Chat Component</h1>
+        </div>
       </v-col>
     </v-row>
 

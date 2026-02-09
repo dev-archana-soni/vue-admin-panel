@@ -644,3 +644,159 @@ export const categoriesAPI = {
     return await response.json();
   },
 };
+
+export const mediaAPI = {
+  getAllMedia: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/media`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch media');
+    }
+
+    return await response.json();
+  },
+
+  uploadMedia: async (token, files) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+
+    const response = await fetch(`${API_BASE_URL}/media`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to upload media');
+    }
+
+    return await response.json();
+  },
+
+  deleteMedia: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/media/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete media');
+    }
+
+    return await response.json();
+  },
+
+  getEmailHistory: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/media/email/history`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch email history');
+    }
+
+    return await response.json();
+  },
+
+  sendEmail: async (token, payload) => {
+    const response = await fetch(`${API_BASE_URL}/media/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to send email');
+    }
+
+    return await response.json();
+  },
+};
+
+export const productsAPI = {
+  getAllProducts: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/products`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch products');
+    }
+
+    return await response.json();
+  },
+
+  createProduct: async (token, payload) => {
+    const response = await fetch(`${API_BASE_URL}/products`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: payload,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create product');
+    }
+
+    return await response.json();
+  },
+
+  updateProduct: async (token, id, payload) => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: payload,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update product');
+    }
+
+    return await response.json();
+  },
+
+  deleteProduct: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete product');
+    }
+
+    return await response.json();
+  },
+};

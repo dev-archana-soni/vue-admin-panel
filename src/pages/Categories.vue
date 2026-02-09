@@ -15,8 +15,13 @@
 
     <v-row class="mb-4">
       <v-col cols="12" md="8">
-        <div class="text-h5">Categories Management</div>
-        <div class="text-caption text-medium-emphasis">Manage income and expense categories</div>
+        <div class="d-flex align-center">
+          <v-icon size="large" class="mr-3">mdi-shape</v-icon>
+          <div>
+            <div class="text-h5">Categories Management</div>
+            <div class="text-caption text-medium-emphasis">Manage income and expense categories</div>
+          </div>
+        </div>
       </v-col>
       <v-col cols="12" md="4" class="text-end">
         <v-btn color="primary" variant="flat" @click="openCreateDialog">
