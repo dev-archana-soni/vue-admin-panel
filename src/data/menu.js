@@ -5,6 +5,8 @@ export const menu = [
   { title: 'User Groups', icon: 'mdi-account-group', to: '/user-groups' },
   { title: 'Categories', icon: 'mdi-shape', to: '/categories' },
   { title: 'Products', icon: 'mdi-package-variant-closed', to: '/products' },
+  { title: 'Orders', icon: 'mdi-receipt-text', to: '/orders' },
+  { title: 'Ecommerce', icon: 'mdi-storefront', to: '/ecommerce' },
   { title: 'Income', icon: 'mdi-cash-plus', to: '/income' },
   { title: 'Expense', icon: 'mdi-cash-minus', to: '/expense' },
   { title: 'Items', icon: 'mdi-package-variant', to: '/items' },

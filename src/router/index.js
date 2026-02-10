@@ -18,6 +18,9 @@ import Permissions from '@/pages/security/Permissions.vue'
 import UserGroups from '@/pages/UserGroups.vue'
 import Categories from '@/pages/Categories.vue'
 import Products from '@/pages/Products.vue'
+import Orders from '@/pages/Orders.vue'
+import Ecommerce from '@/pages/Ecommerce.vue'
+import EcommerceProduct from '@/pages/EcommerceProduct.vue'
 import Income from '@/pages/Income.vue'
 import Expense from '@/pages/Expense.vue'
 import Items from '@/pages/Items.vue'
@@ -36,6 +39,9 @@ const routes = [
   { path: '/user-groups', name: 'user-groups', component: UserGroups, meta: { requiresAuth: true } },
   { path: '/categories', name: 'categories', component: Categories, meta: { requiresAuth: true } },
   { path: '/products', name: 'products', component: Products, meta: { requiresAuth: true } },
+  { path: '/orders', name: 'orders', component: Orders, meta: { requiresAuth: true } },
+  { path: '/ecommerce', name: 'ecommerce', component: Ecommerce, meta: { public: true } },
+  { path: '/ecommerce/product/:id', name: 'ecommerce-product', component: EcommerceProduct, meta: { public: true } },
   { path: '/income', name: 'income', component: Income, meta: { requiresAuth: true } },
   { path: '/expense', name: 'expense', component: Expense, meta: { requiresAuth: true } },
   { path: '/items', name: 'items', component: Items, meta: { requiresAuth: true } },

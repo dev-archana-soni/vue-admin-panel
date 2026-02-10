@@ -800,3 +800,130 @@ export const productsAPI = {
     return await response.json();
   },
 };
+
+export const publicAPI = {
+  getPublicProducts: async () => {
+    const response = await fetch(`${API_BASE_URL}/public/products`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch products');
+    }
+
+    return await response.json();
+  },
+
+  getPublicProductById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/public/products/${id}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch product');
+    }
+
+    return await response.json();
+  },
+
+  getPublicCategories: async () => {
+    const response = await fetch(`${API_BASE_URL}/public/categories`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch categories');
+    }
+
+    return await response.json();
+  },
+};
+
+export const ordersAPI = {
+  getAllOrders: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch orders');
+    }
+
+    return await response.json();
+  },
+
+  getOrderById: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch order');
+    }
+
+    return await response.json();
+  },
+
+  createOrder: async (token, payload) => {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create order');
+    }
+
+    return await response.json();
+  },
+
+  updateOrder: async (token, id, payload) => {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update order');
+    }
+
+    return await response.json();
+  },
+
+  deleteOrder: async (token, id) => {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete order');
+    }
+
+    return await response.json();
+  },
+};

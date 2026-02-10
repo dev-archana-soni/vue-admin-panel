@@ -98,8 +98,11 @@ const userProfile = ref({
   role: ''
 })
 
-const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500']
-const isPublicPage = computed(() => publicRoutes.includes(route.path))
+const publicRoutes = ['/login', '/register', '/404-not-found', '/403', '/500', '/ecommerce', '/ecommerce/product']
+const isPublicPage = computed(() => {
+  if (route.path.startsWith('/ecommerce/product')) return true
+  return publicRoutes.includes(route.path)
+})
 
 const fetchUserProfile = async () => {
   if (!token.value || isPublicPage.value) return
@@ -107,7 +110,7 @@ const fetchUserProfile = async () => {
   try {
     const response = await authAPI.fetchProfile(token.value)
     userProfile.value = response.user
-    console.log('Header: User profile loaded', userProfile.value.image)
+    // console.log('Header: User profile loaded', userProfile.value.image)
   } catch (error) {
     console.error('Failed to load user profile in header:', error)
   }
