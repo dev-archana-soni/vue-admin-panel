@@ -3,6 +3,11 @@
     <div class="ecom-bg" />
     <EcommerceHeader 
       :show-back-button="true"
+      v-model:searchValue="search"
+      :cart-count="cartItemCount"
+      :show-search="true"
+      :show-extra-links="true"
+      @open-cart="cartOpen = true"
     />
 
     <main class="legal-content">
@@ -77,6 +82,8 @@ import EcommerceFooter from '@/components/EcommerceFooter.vue'
 
 .legal-content {
   margin-top: 28px;
+  position: relative;
+  z-index: 1;
 }
 
 .legal-card {

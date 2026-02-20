@@ -90,6 +90,8 @@ import EcommerceFooter from '@/components/EcommerceFooter.vue'
 
 .legal-content {
   margin-top: 28px;
+  position: relative;
+  z-index: 1;
 }
 
 .legal-card {
