@@ -1,14 +1,19 @@
 <template>
-  <v-container class="py-6" fluid>
-    <v-progress-linear v-if="loading" indeterminate color="primary" />
+  <v-container class="ecom-page" fluid>
+    <div class="ecom-bg" />
+    <EcommerceHeader 
+      :show-extra-links="true"
+    />
 
-    <v-alert v-if="errorMessage" type="error" closable class="mb-4" @click:close="errorMessage = ''">
+    <v-progress-linear v-if="loading" indeterminate color="primary" class="mt-4" />
+
+    <v-alert v-if="errorMessage" type="error" closable class="mt-4 mb-4" @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
-    <v-btn variant="text" class="mb-4" to="/ecommerce">
+    <v-btn variant="text" class="mt-4 mb-4" to="/ecommerce">
       <v-icon left>mdi-arrow-left</v-icon>
-      Back to Ecommerce
+      Back to Shop
     </v-btn>
 
     <v-row v-if="product" dense>
@@ -46,12 +51,14 @@
           <div class="text-caption text-medium-emphasis">Category</div>
           <div class="text-subtitle-2 mb-3">{{ product.category?.name || 'Uncategorized' }}</div>
 
-          <v-btn variant="outlined" to="/ecommerce">
-            Continue shopping
+          <v-btn variant="flat" color="primary" block size="large" to="/ecommerce">
+            Continue Shopping
           </v-btn>
         </v-card>
       </v-col>
     </v-row>
+
+    <EcommerceFooter />
   </v-container>
 </template>
 
@@ -59,8 +66,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { publicAPI } from '@/services/authService'
+import EcommerceHeader from '@/components/EcommerceHeader.vue'
+import EcommerceFooter from '@/components/EcommerceFooter.vue'
 
 const route = useRoute()
+
 const loading = ref(false)
 const errorMessage = ref('')
 const product = ref(null)
@@ -92,3 +102,172 @@ onMounted(() => {
   fetchProduct()
 })
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+.ecom-page {
+  --ecom-ink: #1f1a16;
+  --ecom-muted: #6b5f56;
+  --ecom-cream: #f7f2ea;
+  --ecom-sand: #efe4d6;
+  --ecom-coral: #ff6b4a;
+  --ecom-forest: #1f6f5c;
+  --ecom-card: #ffffff;
+  position: relative;
+  min-height: 100vh;
+  padding: 32px 36px 48px;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--ecom-ink);
+}
+
+.ecom-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 20%, rgba(255, 219, 190, 0.6), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(175, 215, 206, 0.5), transparent 40%),
+    linear-gradient(135deg, #fdf9f3 0%, #f4ebe0 45%, #fff 100%);
+  z-index: 0;
+}
+
+.ecom-header,
+.ecom-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.ecom-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ecom-coral);
+  color: #fff;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.brand-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.brand-tag {
+  font-size: 12px;
+  color: var(--ecom-muted);
+}
+
+.ecom-nav {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  color: var(--ecom-muted);
+}
+
+.ecom-link {
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ecom-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ecom-footer {
+  margin-top: 40px;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(31, 26, 22, 0.85);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+}
+
+.footer-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  color: #fff;
+}
+
+.footer-meta {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 960px) {
+  .ecom-header {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .ecom-nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ecom-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .ecom-page {
+    padding: 20px 16px 32px;
+  }
+
+  .ecom-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>

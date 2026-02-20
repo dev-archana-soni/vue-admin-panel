@@ -1,36 +1,14 @@
 <template>
   <v-container class="ecom-page" fluid>
     <div class="ecom-bg" />
-    <header class="ecom-header">
-      <div class="brand">
-        <div class="brand-mark">E</div>
-        <div>
-          <div class="brand-title">Evercart</div>
-          <div class="brand-tag">Everyday essentials, curated</div>
-        </div>
-      </div>
-      <nav class="ecom-nav">
-        <RouterLink to="/ecommerce" class="ecom-link">Shop</RouterLink>
-        <span class="ecom-link">Collections</span>
-        <span class="ecom-link">New In</span>
-        <span class="ecom-link">Support</span>
-      </nav>
-      <div class="ecom-actions">
-        <v-text-field
-          v-model="search"
-          density="compact"
-          variant="solo"
-          hide-details
-          placeholder="Search products"
-          prepend-inner-icon="mdi-magnify"
-          class="ecom-search"
-        />
-        <v-btn color="primary" variant="flat" class="ecom-cart" @click="cartOpen = true">
-          <v-icon left>mdi-cart</v-icon>
-          Cart ({{ cartItemCount }})
-        </v-btn>
-      </div>
-    </header>
+    <EcommerceHeader 
+      v-model:searchValue="search"
+      :cart-count="cartItemCount"
+      :show-search="true"
+      :show-cart="true"
+      :show-extra-links="true"
+      @open-cart="cartOpen = true"
+    />
 
     <section class="ecom-hero">
       <div>
@@ -87,11 +65,6 @@
             <li>7-day easy returns</li>
             <li>Verified supplier network</li>
           </ul>
-        </div>
-        <div class="sidebar-card promo">
-          <div class="promo-title">Pro member</div>
-          <div class="promo-text">Extra 10% off on your first order.</div>
-          <v-btn color="primary" variant="flat">Join now</v-btn>
         </div>
       </aside>
 
@@ -154,78 +127,14 @@
       </section>
     </section>
 
-    <v-navigation-drawer v-model="cartOpen" location="right" temporary width="420">
-      <div class="px-4 py-4">
-        <div class="d-flex align-center justify-space-between mb-2">
-          <div class="text-h6">Cart</div>
-          <v-btn icon variant="text" @click="cartOpen = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </div>
-
-        <v-alert v-if="cartItems.length === 0" type="info" variant="tonal" class="mb-4">
-          Your cart is empty.
-        </v-alert>
-
-        <v-card v-for="item in cartItems" :key="item.id" class="mb-3" variant="outlined">
-          <v-card-text>
-            <div class="d-flex align-center">
-              <v-avatar size="48" rounded class="mr-3">
-                <v-img :src="item.image || '/m.png'" />
-              </v-avatar>
-              <div class="flex-grow-1">
-                <div class="text-subtitle-2 font-weight-medium">{{ item.name }}</div>
-                <div class="text-caption text-medium-emphasis">₹{{ formatAmount(item.price) }}</div>
-              </div>
-              <v-btn icon variant="text" color="error" @click="removeFromCart(item.id)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </div>
-
-            <div class="d-flex align-center justify-space-between mt-3">
-              <div class="d-flex align-center">
-                <v-btn icon variant="outlined" size="small" @click="decreaseQty(item.id)">
-                  <v-icon>mdi-minus</v-icon>
-                </v-btn>
-                <div class="mx-3">{{ item.quantity }}</div>
-                <v-btn
-                  icon
-                  variant="outlined"
-                  size="small"
-                  :disabled="item.quantity >= item.stock"
-                  @click="increaseQty(item.id)"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-              </div>
-              <div class="text-subtitle-2">₹{{ formatAmount(item.price * item.quantity) }}</div>
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <v-divider class="my-4" />
-
-        <div class="d-flex align-center justify-space-between mb-2">
-          <span class="text-medium-emphasis">Subtotal</span>
-          <span class="text-subtitle-1">₹{{ formatAmount(cartSubtotal) }}</span>
-        </div>
-        <div class="d-flex align-center justify-space-between mb-4">
-          <span class="text-medium-emphasis">Items</span>
-          <span>{{ cartItemCount }}</span>
-        </div>
-
-        <v-btn
-          block
-          color="primary"
-          variant="flat"
-          :disabled="cartItems.length === 0"
-          @click="openCheckout"
-        >
-          <v-icon left>mdi-check</v-icon>
-          Checkout
-        </v-btn>
-      </div>
-    </v-navigation-drawer>
+    <EcommerceCartDrawer 
+      v-model:is-open="cartOpen"
+      :items="cartItems"
+      @remove-item="removeFromCart"
+      @decrease-quantity="decreaseQty"
+      @increase-quantity="increaseQty"
+      @checkout="openCheckout"
+    />
 
     <v-dialog v-model="checkoutDialog" max-width="720px" persistent>
       <v-card>
@@ -334,25 +243,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <footer class="ecom-footer">
-      <div>
-        <div class="footer-title">Evercart</div>
-        <div class="footer-text">Reliable commerce for teams that move fast.</div>
-      </div>
-      <div class="footer-links">
-        <span>Shipping</span>
-        <span>Returns</span>
-        <span>Privacy</span>
-        <span>Terms</span>
-      </div>
-      <div class="footer-meta">© 2026 Evercart Studio</div>
-    </footer>
+    <EcommerceFooter />
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { publicAPI } from '@/services/authService'
+import EcommerceHeader from '@/components/EcommerceHeader.vue'
+import EcommerceFooter from '@/components/EcommerceFooter.vue'
+import EcommerceCartDrawer from '@/components/EcommerceCartDrawer.vue'
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -584,9 +484,26 @@ const submitCheckout = async () => {
   checkoutError.value = ''
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 600))
+    const payload = {
+      customerName: checkoutForm.value.name,
+      customerEmail: checkoutForm.value.email,
+      customerPhone: checkoutForm.value.phone,
+      shippingAddress: checkoutForm.value.address,
+      shippingCity: checkoutForm.value.city,
+      shippingState: checkoutForm.value.state,
+      shippingPostalCode: checkoutForm.value.postalCode,
+      notes: checkoutForm.value.notes,
+      items: cartItems.value.map(item => ({
+        product: item.id,
+        quantity: item.quantity,
+        price: item.price
+      }))
+    }
+
+    await publicAPI.createPublicOrder(payload)
     checkoutDialog.value = false
-    alert('Checkout submitted. Order creation will be wired next.')
+    cartItems.value = []
+    alert('Order placed successfully!')
   } catch (error) {
     checkoutError.value = error.message || 'Checkout failed'
   } finally {
@@ -627,81 +544,10 @@ onMounted(() => {
   z-index: 0;
 }
 
-.ecom-header,
 .ecom-hero,
-.ecom-body,
-.ecom-footer {
+.ecom-body {
   position: relative;
   z-index: 1;
-}
-
-.ecom-header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 24px;
-  align-items: center;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 18px;
-  backdrop-filter: blur(12px);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--ecom-coral);
-  color: #fff;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-}
-
-.brand-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.brand-tag {
-  font-size: 12px;
-  color: var(--ecom-muted);
-}
-
-.ecom-nav {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  color: var(--ecom-muted);
-}
-
-.ecom-link {
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-}
-
-.ecom-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.ecom-search {
-  max-width: 220px;
-}
-
-.ecom-cart {
-  text-transform: none;
 }
 
 .ecom-hero {
@@ -840,53 +686,7 @@ onMounted(() => {
   color: inherit;
 }
 
-.ecom-footer {
-  margin-top: 40px;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(31, 26, 22, 0.85);
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-}
-
-.footer-text {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.footer-links {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.footer-meta {
-  color: rgba(255, 255, 255, 0.7);
-}
-
 @media (max-width: 960px) {
-  .ecom-header {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
-
-  .ecom-nav {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .ecom-actions {
-    width: 100%;
-  }
-
   .ecom-hero {
     grid-template-columns: 1fr;
   }
@@ -899,15 +699,6 @@ onMounted(() => {
 @media (max-width: 600px) {
   .ecom-page {
     padding: 20px 16px 32px;
-  }
-
-  .ecom-search {
-    max-width: 100%;
-  }
-
-  .ecom-actions {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 </style>

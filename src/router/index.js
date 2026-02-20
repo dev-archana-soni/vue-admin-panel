@@ -21,6 +21,14 @@ import Products from '@/pages/Products.vue'
 import Orders from '@/pages/Orders.vue'
 import Ecommerce from '@/pages/Ecommerce.vue'
 import EcommerceProduct from '@/pages/EcommerceProduct.vue'
+import EcommerceReturns from '@/pages/EcommerceReturns.vue'
+import EcommercePrivacy from '@/pages/EcommercePrivacy.vue'
+import EcommerceTerms from '@/pages/EcommerceTerms.vue'
+import EcommerceSupport from '@/pages/EcommerceSupport.vue'
+import EcommerceAbout from '@/pages/EcommerceAbout.vue'
+import EcommerceRegister from '@/pages/EcommerceRegister.vue'
+import EcommerceLogin from '@/pages/EcommerceLogin.vue'
+import EcommerceAccount from '@/pages/EcommerceAccount.vue'
 import Income from '@/pages/Income.vue'
 import Expense from '@/pages/Expense.vue'
 import Items from '@/pages/Items.vue'
@@ -42,6 +50,14 @@ const routes = [
   { path: '/orders', name: 'orders', component: Orders, meta: { requiresAuth: true } },
   { path: '/ecommerce', name: 'ecommerce', component: Ecommerce, meta: { public: true } },
   { path: '/ecommerce/product/:id', name: 'ecommerce-product', component: EcommerceProduct, meta: { public: true } },
+  { path: '/ecommerce/about', name: 'ecommerce-about', component: EcommerceAbout, meta: { public: true } },
+  { path: '/ecommerce/returns', name: 'ecommerce-returns', component: EcommerceReturns, meta: { public: true } },
+  { path: '/ecommerce/privacy', name: 'ecommerce-privacy', component: EcommercePrivacy, meta: { public: true } },
+  { path: '/ecommerce/terms', name: 'ecommerce-terms', component: EcommerceTerms, meta: { public: true } },
+  { path: '/ecommerce/support', name: 'ecommerce-support', component: EcommerceSupport, meta: { public: true } },
+  { path: '/ecommerce/register', name: 'ecommerce-register', component: EcommerceRegister, meta: { public: true } },
+  { path: '/ecommerce/login', name: 'ecommerce-login', component: EcommerceLogin, meta: { public: true } },
+  { path: '/ecommerce/account', name: 'ecommerce-account', component: EcommerceAccount, meta: { requiresAuth: true } },
   { path: '/income', name: 'income', component: Income, meta: { requiresAuth: true } },
   { path: '/expense', name: 'expense', component: Expense, meta: { requiresAuth: true } },
   { path: '/items', name: 'items', component: Items, meta: { requiresAuth: true } },

@@ -75,6 +75,49 @@ export function useAuth() {
     }
   };
 
+  const setAuth = (newToken, newUser) => {
+    setToken(newToken);
+    setUser(newUser);
+    sessionChecked.value = true;
+  };
+
+  const clearAuth = () => {
+    token.value = null;
+    user.value = null;
+    sessionChecked.value = false;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  const getProfile = async () => {
+    if (!token.value) {
+      throw new Error('Not authenticated');
+    }
+    return await authAPI.fetchProfile(token.value);
+  };
+
+  const updateProfile = async (profileData) => {
+    if (!token.value) {
+      throw new Error('Not authenticated');
+    }
+    const result = await authAPI.updateProfile(token.value, profileData);
+    if (result?.user) {
+      setUser(result.user);
+    }
+    return result;
+  };
+
+  const updatePassword = async (currentPassword, newPassword, confirmPassword) => {
+    if (!token.value) {
+      throw new Error('Not authenticated');
+    }
+    return await authAPI.updatePassword(token.value, {
+      currentPassword,
+      newPassword,
+      confirmPassword
+    });
+  };
+
   return {
     token,
     user,
@@ -83,5 +126,10 @@ export function useAuth() {
     register,
     logout,
     ensureSession,
+    setAuth,
+    clearAuth,
+    getProfile,
+    updateProfile,
+    updatePassword,
   };
 }
